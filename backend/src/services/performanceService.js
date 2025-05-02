@@ -20,15 +20,25 @@ const getPageSpeed = async (domain) => {
     if (!data.lighthouseResult) {
       throw new Error('No Lighthouse data found in the response');
     }
+    
+    const getPassFailBadge = (score) => {
+        if (score >= 80) return { label: 'Pass', color: 'success.main' };
+        if (score <= 40) return { label: 'Fail', color: 'error.main' };
+        return null;
+      };
 
     console.log('✅ PageSpeed data successfully fetched');
+    const totalBytes = data.lighthouseResult.audits['total-byte-weight']?.numericValue || 0;
+    const totalRequests = data.lighthouseResult.audits['network-requests']?.details?.items?.length || 0;
 
     return {
-      performanceScore: data.lighthouseResult.categories.performance.score,
-      firstContentfulPaint: data.lighthouseResult.audits['first-contentful-paint'].displayValue,
-      speedIndex: data.lighthouseResult.audits['speed-index'].displayValue,
-      timeToInteractive: data.lighthouseResult.audits['interactive'].displayValue,
-    };
+        performanceScore: Math.round(data.lighthouseResult.categories.performance.score * 100),
+        firstContentfulPaint: (data.lighthouseResult.audits['first-contentful-paint'].numericValue / 1000).toFixed(2),
+        speedIndex: (data.lighthouseResult.audits['speed-index'].numericValue / 1000).toFixed(2),
+        timeToInteractive: (data.lighthouseResult.audits['interactive'].numericValue / 1000).toFixed(2),
+        pageSize: (totalBytes / (1024 * 1024)).toFixed(2), // Convert bytes to MB
+        pageRequests: totalRequests
+      };   
   } catch (error) {
     console.error("❌ PageSpeed fetch error:", error.message);
     if (error.response) {

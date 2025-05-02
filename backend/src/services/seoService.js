@@ -1,22 +1,34 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
+const axios = require('axios');
 
-const getSEO = async (domain) => {
+const analyzeSEO = async (domain) => {
   try {
-    const response = await axios.get(`https://${domain}`);
-    const $ = cheerio.load(response.data);
+    const { data: html } = await axios.get(`https://${domain}`);
+    const $ = cheerio.load(html);
 
-    const title = $('title').text();
-    const metaDescription = $('meta[name="description"]').attr('content') || 'No description available';
+    const permissionToIndex = !$('meta[name="robots"]').attr('content')?.includes('noindex');
+    const metaDescription = !!$('meta[name="description"]').attr('content');
+    const contentPlugins = !($('object, embed, applet').length > 0);
+    const descriptiveLinkText = $('a').toArray().every(link => {
+      const text = $(link).text().trim().toLowerCase();
+      return text && !['click here', 'read more', 'more', 'link'].includes(text);
+    });
 
     return {
-      titleLength: title.length,
+      permissionToIndex,
       metaDescription,
+      contentPlugins,
+      descriptiveLinkText,
     };
   } catch (error) {
-    console.error("❌ SEO fetch error:", error.message);
-    throw new Error('Failed to fetch SEO data');
+    console.error("❌ SEO analysis failed:", error.message);
+    return {
+      permissionToIndex: false,
+      metaDescription: false,
+      contentPlugins: false,
+      descriptiveLinkText: false,
+    };
   }
 };
 
-module.exports = { getSEO };
+module.exports = { analyzeSEO };
