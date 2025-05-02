@@ -4,7 +4,6 @@ require('dotenv').config();
 const getPageSpeed = async (domain) => {
   const apiKey = process.env.GOOGLE_PAGESPEED_API_KEY;
 
-  // Check if the API key is missing or empty
   if (!apiKey) {
     console.error("❌ Google PageSpeed API Key is missing in the .env file");
     throw new Error('Missing Google PageSpeed API Key');
@@ -15,7 +14,7 @@ const getPageSpeed = async (domain) => {
   try {
     console.log(`🔄 Fetching PageSpeed data for: https://${domain}`);
 
-    const response = await axios.get(url);
+    const response = await axios.get(url, { timeout: 14000 }); // 👈 Only this call gets a longer timeout
     const data = response.data;
 
     if (!data.lighthouseResult) {
@@ -32,11 +31,8 @@ const getPageSpeed = async (domain) => {
     };
   } catch (error) {
     console.error("❌ PageSpeed fetch error:", error.message);
-    // Log the response if available
     if (error.response) {
       console.error('Response data:', error.response.data);
-      console.error('Response status:', error.response.status);
-      console.error('Response headers:', error.response.headers);
     }
     throw new Error('Failed to fetch PageSpeed data');
   }

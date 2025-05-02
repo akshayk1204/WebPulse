@@ -1,5 +1,7 @@
 const axios = require('axios');
 const sslChecker = require('ssl-checker');
+axios.defaults.timeout = 8000; 
+
 
 const getSecurity = async (domain) => {
   try {
