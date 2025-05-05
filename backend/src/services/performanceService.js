@@ -62,7 +62,7 @@ const getPageSpeed = async (domain) => {
   
     // Return placeholder values for UI development
     return {
-      performanceScore: 58,
+      performanceScore: 90,
       firstContentfulPaint: 2.1,     // seconds
       speedIndex: 3.4,               // seconds
       timeToInteractive: 5.0,        // seconds
