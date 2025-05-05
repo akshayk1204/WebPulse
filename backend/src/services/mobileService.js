@@ -11,11 +11,15 @@ const analyzeMobileMetrics = async (url) => {
     });
 
     const $ = cheerio.load(response.data);
+    const html = response.data;
     
     return {
       responsive: checkResponsiveDesign($),
       viewportMeta: $('meta[name="viewport"]').length > 0,
       tapTargets: checkTapTargets($),
+      mobileSpeed: await checkMobileSpeed(html), // New metric
+      fontSizes: checkFontSizes($),             // New metric
+      contentFitting: checkContentFitting($),   // New metric
       screenshot: `https://s0.wp.com/mshots/v1/${url}?w=400`,
       lastChecked: new Date().toISOString()
     };
@@ -25,12 +29,16 @@ const analyzeMobileMetrics = async (url) => {
       responsive: false,
       viewportMeta: false,
       tapTargets: false,
+      mobileSpeed: false,
+      fontSizes: false,
+      contentFitting: false,
       error: error.message,
       lastChecked: new Date().toISOString()
     };
   }
 };
 
+// Existing checks
 const checkResponsiveDesign = ($) => {
   try {
     const hasViewportMeta = $('meta[name="viewport"]').length > 0;
@@ -61,6 +69,39 @@ const checkTapTargets = ($) => {
     });
 
     return allValid;
+  } catch (e) {
+    return false;
+  }
+};
+
+// New metric checks
+const checkMobileSpeed = async (html) => {
+  try {
+    // Simple heuristic: check if page is reasonably small
+    const maxSize = 500000; // 500KB
+    return html.length < maxSize;
+  } catch (e) {
+    return false;
+  }
+};
+
+const checkFontSizes = ($) => {
+  try {
+    const bodyFontSize = parseInt($('body').css('font-size')) || 16;
+    return bodyFontSize >= 14; // Minimum recommended font size
+  } catch (e) {
+    return false;
+  }
+};
+
+const checkContentFitting = ($) => {
+  try {
+    // Check if any elements have horizontal scrolling
+    const hasHorizontalScroll = $('*').filter((i, el) => {
+      return el.scrollWidth > el.clientWidth;
+    }).length > 0;
+    
+    return !hasHorizontalScroll;
   } catch (e) {
     return false;
   }
