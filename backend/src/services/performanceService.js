@@ -67,7 +67,7 @@ const getPageSpeed = async (domain) => {
       speedIndex: 3.4,               // seconds
       timeToInteractive: 5.0,        // seconds
       pageSize: '2.3',               // MB
-      pageRequests: 79,
+      pageRequests: 80,
       screenshot: 'https://www.webpagetest.org/result/200502_XY/1_performance.png',  // Placeholder or actual screenshot URL
       source: 'default'
     };
