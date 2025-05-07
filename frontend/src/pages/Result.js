@@ -17,12 +17,12 @@ import DevicesIcon from '@mui/icons-material/Devices';
 import PublicIcon from '@mui/icons-material/Public';
 //import SEOSection from '../components/SEOSection';
 import SecuritySection from '../sections/securitySection';
-import RecommendationSection from '../sections/RecommendationSection';
+//import RecommendationSection from '../sections/RecommendationSection';
 const PerformanceSection = React.lazy(() => import('../sections/PerformanceSection'));
 const SEOSection = React.lazy(() => import('../sections/SEOSection'));
 const MobileSection = React.lazy(() => import('../sections/MobileSection'));
 //const SecuritySection = React.lazy(() => import('../sections/securitySection'));
-//const RecommendationSection = React.lazy(() => import('../sections/RecommendationSection'));
+const RecommendationSection = React.lazy(() => import('../sections/RecommendationSection'));
 
 // Translation dictionaries
 const translations = {
@@ -112,7 +112,7 @@ const translations = {
 };
 
 const SidePanel = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.dark,
+  backgroundColor: '#00112F',
   color: theme.palette.common.white,
   width: '25%',
   minHeight: '100vh',
@@ -135,7 +135,7 @@ const MainContent = styled('div')(({ theme }) => ({
   marginLeft: '25%',
   width: '75%',
   padding: theme.spacing(4),
-  backgroundColor: '#d6d6d6',
+  backgroundColor: '#E0E7F7 ',
   [theme.breakpoints.down('lg')]: {
     marginLeft: '30%',
     width: '70%'
@@ -418,6 +418,8 @@ const Result = () => {
   const seoData = state?.seo?.data || state?.seo || {};
   const securityData = state?.security?.data || state?.security || {};
   const mobileData = state?.mobile?.data || state?.mobile || {};
+  
+  console.log("Security data in Result.js:", securityData);
 
   const performanceScore = performanceData?.performanceScore || 0;
   const seoScore = calculateSeoScore(seoData);
@@ -568,7 +570,7 @@ const Result = () => {
           <div id="security-section">
             <SecuritySection security={securityData} language={language} />
           </div>
-
+          
           <div id="recommendation-section">
             <RecommendationSection
               performanceData={performanceData}

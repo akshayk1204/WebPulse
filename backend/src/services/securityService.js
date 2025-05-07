@@ -139,11 +139,26 @@ const getSecurity = async (domain) => {
     const firewallInfo = detectWAF(headers, body);
     const cookieSecurity = checkCookieSecurity(headers['set-cookie']);
 
+    console.log('Security metrics for domain:', domain);
+    console.dir({
+    sslStatus,
+    https: httpsAvailable,
+    securityHeaders: headers['strict-transport-security'] ? 'Enabled' : 'Disabled',
+    firewallDetected: firewallInfo.firewallDetected,  
+    firewallName: firewallInfo.firewallName,
+    corsPolicy: headers['access-control-allow-origin']
+        ? (headers['access-control-allow-origin'] === '*' ? 'Public' : 'Restricted')
+        : 'Not configured',
+    xssProtection: headers['x-xss-protection'] || 'Not configured',
+    contentSecurityPolicy: headers['content-security-policy'] ? 'Configured' : 'Not configured',
+    cookieSecurity,
+    lastChecked: new Date().toISOString()
+    }, { depth: null });
     return {
       sslStatus,
       https: httpsAvailable,
       securityHeaders: headers['strict-transport-security'] ? 'Enabled' : 'Disabled',
-      firewallDetected: firewallInfo.firewallDetected,
+      firewallDetected: firewallInfo.firewallDetected,  
       firewallName: firewallInfo.firewallName,
       corsPolicy: headers['access-control-allow-origin']
         ? (headers['access-control-allow-origin'] === '*' ? 'Public' : 'Restricted')

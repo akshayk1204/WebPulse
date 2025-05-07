@@ -7,8 +7,8 @@ import PropTypes from 'prop-types';
 // Translation dictionaries
 const translations = {
   en: {
-    pass: "PASS",
-    fail: "FAIL",
+    pass: "Pass",
+    fail: "Fail",
     sectionTitle: "SEO",
     sectionTagline: "Boost discoverability—optimize how your site is found and displayed in search results.",
     motivationalPhrases: {
@@ -79,8 +79,8 @@ const translations = {
     }
   },
   es: {
-    pass: "APROBADO",
-    fail: "FALLO",
+    pass: "Aprobado",
+    fail: "Fallido",
     sectionTitle: "SEO",
     sectionTagline: "Impulsa la descubribilidad—optimiza cómo se encuentra y muestra tu sitio en los resultados de búsqueda.",
     motivationalPhrases: {

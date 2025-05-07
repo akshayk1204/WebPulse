@@ -10,278 +10,7 @@ import {
   Paper
 } from '@mui/material';
 import PropTypes from 'prop-types';
-
-// Translation dictionaries
-const translations = {
-  en: {
-    title: "What Should I Do Next?",
-    description: "Based on your test results, we've identified some opportunities to improve your site's performance, SEO, mobile usability, and security.",
-    categories: {
-      performance: "Performance",
-      seo: "SEO",
-      mobile: "Mobile",
-      security: "Security"
-    },
-    performance: {
-      requests: {
-        label: 'Page Requests',
-        recommendation: '< 50',
-        notes: 'Reduce HTTP requests by removing unnecessary scripts, images, or lazy-loading content.'
-      },
-      pageSize: {
-        label: 'Page Size (MB)',
-        recommendation: '< 3 MB',
-        notes: 'Compress images, minify CSS/JS, and use modern image formats to reduce size.'
-      },
-      pageSpeed: {
-        label: 'Page Speed (s)',
-        recommendation: '< 2s',
-        notes: 'Optimize server response, defer non-critical JS, and improve caching strategies.'
-      },
-      firstContentfulPaint: {
-        label: 'First Contentful Paint (s)',
-        recommendation: '< 1.8s',
-        notes: 'Reduce render-blocking resources and prioritize visible content.'
-      },
-      speedIndex: {
-        label: 'Speed Index (s)',
-        recommendation: '< 2s',
-        notes: 'Prioritize above-the-fold content and use efficient CSS/JS delivery.'
-      },
-      timeToInteractive: {
-        label: 'Time to Interactive (s)',
-        recommendation: '< 3.8s',
-        notes: 'Reduce main-thread work and minimize third-party scripts.'
-      }
-    },
-    seo: {
-      indexable: {
-        label: 'Permission To Index',
-        recommendation: 'Yes',
-        notes: 'Ensure your robots.txt and meta tags allow search engine indexing.'
-      },
-      hasMetaDescription: {
-        label: 'Meta Description',
-        recommendation: 'Present',
-        notes: 'Include concise meta descriptions (50-160 chars) on all important pages.'
-      },
-      usesCleanContent: {
-        label: 'Clean Content',
-        recommendation: 'No bad plugins',
-        notes: 'Avoid problematic plugins that generate bloated HTML.'
-      },
-      hasDescriptiveLinks: {
-        label: 'Descriptive Link Text',
-        recommendation: 'Use descriptive text',
-        notes: 'Avoid generic terms like "click here" in links.'
-      }
-    },
-    mobile: {
-      responsive: {
-        label: 'Responsive Design',
-        recommendation: 'Yes',
-        notes: 'Use responsive design techniques like fluid grids and media queries.'
-      },
-      viewport: {
-        label: 'Viewport Meta Tag',
-        recommendation: 'Present',
-        notes: 'Ensure viewport meta tag is correctly configured.'
-      },
-      tapTargets: {
-        label: 'Tap Targets',
-        recommendation: 'Adequate',
-        notes: 'Ensure tap targets are large and spaced properly.'
-      }
-    },
-    security: {
-      ssl: {
-        label: 'SSL Certificate',
-        recommendation: 'Valid',
-        notes: 'Install a valid SSL certificate to secure communications.'
-      },
-      https: {
-        label: 'HTTPS',
-        recommendation: 'Enabled',
-        notes: 'Redirect all traffic to HTTPS and avoid mixed content.'
-      },
-      headers: {
-        label: 'Security Headers',
-        recommendation: 'Enabled',
-        notes: 'Add HTTP security headers like CSP, HSTS, and X-Frame-Options.'
-      },
-      firewall: {
-        label: 'Firewall Detected',
-        recommendation: 'Present',
-        notes: 'Deploy a WAF like Edgecast to block malicious traffic and OWASP threats.'
-      },
-      cors: {
-        label: 'CORS Policy',
-        recommendation: 'Configured',
-        notes: 'Define appropriate CORS policies to control cross-origin access.'
-      },
-      cookie: {
-        label: 'Cookie Security',
-        recommendation: 'Secure/HttpOnly',
-        notes: 'Use Secure and HttpOnly flags on cookies to protect session data.'
-      },
-      xss: {
-        label: 'XSS Protection',
-        recommendation: 'Enabled',
-        notes: 'Sanitize user input and enable browser-based XSS protection.'
-      },
-      csp: {
-        label: 'Content Security',
-        recommendation: 'CSP Applied',
-        notes: 'Use CSP headers to restrict code sources.'
-      }
-    },
-    tableHeaders: {
-      metric: "Metric",
-      current: "Current",
-      recommended: "Recommended",
-      notes: "Notes"
-    },
-    status: {
-      fail: "Fail",
-      slightDelay: "Slight delay",
-      sluggish: "Feels sluggish, speed it up!"
-    }
-  },
-  es: {
-    title: "¿Qué Debo Hacer Ahora?",
-    description: "Basándonos en los resultados de tus pruebas, hemos identificado oportunidades para mejorar el rendimiento, SEO, usabilidad móvil y seguridad de tu sitio.",
-    categories: {
-      performance: "Rendimiento",
-      seo: "SEO",
-      mobile: "Móvil",
-      security: "Seguridad"
-    },
-    performance: {
-      requests: {
-        label: 'Solicitudes de Página',
-        recommendation: '< 50',
-        notes: 'Reduce solicitudes HTTP eliminando scripts innecesarios, imágenes o cargando contenido de forma diferida.'
-      },
-      pageSize: {
-        label: 'Tamaño de Página (MB)',
-        recommendation: '< 3 MB',
-        notes: 'Comprime imágenes, minifica CSS/JS y usa formatos de imagen modernos para reducir tamaño.'
-      },
-      pageSpeed: {
-        label: 'Velocidad de Página (s)',
-        recommendation: '< 2s',
-        notes: 'Optimiza la respuesta del servidor, difiere JS no crítico y mejora estrategias de caché.'
-      },
-      firstContentfulPaint: {
-        label: 'Primera Pintura con Contenido (s)',
-        recommendation: '< 1.8s',
-        notes: 'Reduce recursos que bloquean el renderizado y prioriza contenido visible.'
-      },
-      speedIndex: {
-        label: 'Índice de Velocidad (s)',
-        recommendation: '< 2s',
-        notes: 'Prioriza contenido arriba del pliegue y usa entrega eficiente de CSS/JS.'
-      },
-      timeToInteractive: {
-        label: 'Tiempo para Interactividad (s)',
-        recommendation: '< 3.8s',
-        notes: 'Reduce trabajo en el hilo principal y minimiza scripts de terceros.'
-      }
-    },
-    seo: {
-      indexable: {
-        label: 'Permiso para Indexar',
-        recommendation: 'Sí',
-        notes: 'Asegúrate que tu robots.txt y meta tags permitan indexación por motores de búsqueda.'
-      },
-      hasMetaDescription: {
-        label: 'Meta Descripción',
-        recommendation: 'Presente',
-        notes: 'Incluye meta descripciones concisas (50-160 caracteres) en páginas importantes.'
-      },
-      usesCleanContent: {
-        label: 'Contenido Limpio',
-        recommendation: 'Sin plugins problemáticos',
-        notes: 'Evita plugins que generen HTML inflado.'
-      },
-      hasDescriptiveLinks: {
-        label: 'Texto Descriptivo en Enlaces',
-        recommendation: 'Usa texto descriptivo',
-        notes: 'Evita términos genéricos como "haz clic aquí" en enlaces.'
-      }
-    },
-    mobile: {
-      responsive: {
-        label: 'Diseño Responsivo',
-        recommendation: 'Sí',
-        notes: 'Usa técnicas de diseño responsivo como grids fluidos y media queries.'
-      },
-      viewport: {
-        label: 'Meta Tag Viewport',
-        recommendation: 'Presente',
-        notes: 'Asegúrate que la etiqueta meta viewport esté configurada correctamente.'
-      },
-      tapTargets: {
-        label: 'Objetivos Táctiles',
-        recommendation: 'Adecuados',
-        notes: 'Asegúrate que los objetivos táctiles sean grandes y estén bien espaciados.'
-      }
-    },
-    security: {
-      ssl: {
-        label: 'Certificado SSL',
-        recommendation: 'Válido',
-        notes: 'Instala un certificado SSL válido para asegurar comunicaciones.'
-      },
-      https: {
-        label: 'HTTPS',
-        recommendation: 'Habilitado',
-        notes: 'Redirige todo el tráfico a HTTPS y evita contenido mixto.'
-      },
-      headers: {
-        label: 'Encabezados de Seguridad',
-        recommendation: 'Habilitados',
-        notes: 'Añade encabezados HTTP de seguridad como CSP, HSTS y X-Frame-Options.'
-      },
-      firewall: {
-        label: 'Firewall Detectado',
-        recommendation: 'Presente',
-        notes: 'Implementa un WAF como Edgecast para bloquear tráfico malicioso y amenazas OWASP.'
-      },
-      cors: {
-        label: 'Política CORS',
-        recommendation: 'Configurada',
-        notes: 'Define políticas CORS apropiadas para controlar acceso entre orígenes.'
-      },
-      cookie: {
-        label: 'Seguridad de Cookies',
-        recommendation: 'Secure/HttpOnly',
-        notes: 'Usa flags Secure y HttpOnly en cookies para proteger datos de sesión.'
-      },
-      xss: {
-        label: 'Protección XSS',
-        recommendation: 'Habilitada',
-        notes: 'Sanitiza entrada de usuario y habilita protección XSS del navegador.'
-      },
-      csp: {
-        label: 'Seguridad de Contenido',
-        recommendation: 'CSP Aplicado',
-        notes: 'Usa encabezados CSP para restringir fuentes de código.'
-      }
-    },
-    tableHeaders: {
-      metric: "Métrica",
-      current: "Actual",
-      recommended: "Recomendado",
-      notes: "Notas"
-    },
-    status: {
-      fail: "Fallido",
-      slightDelay: "Ligero retraso",
-      sluggish: "¡Se siente lento, aceléralo!"
-    }
-  }
-};
+import translations from '../translations/recommendations';
 
 const RecommendationSection = ({ 
   performanceData, 
@@ -292,54 +21,161 @@ const RecommendationSection = ({
 }) => {
   const t = translations[language];
   const rows = [];
-  const seen = new Set();
+
+  // Define which metrics we actually track and their corresponding translation keys
+  const trackedMetrics = {
+    performance: [
+      { dataKey: 'performanceScore', translationKey: 'performanceScore', condition: value => value < 75 },
+      { dataKey: 'firstContentfulPaint', translationKey: 'firstContentfulPaint', condition: value => value > 2.5 },
+      { dataKey: 'speedIndex', translationKey: 'speedIndex', condition: value => value > 3.5 },
+      { dataKey: 'timeToInteractive', translationKey: 'timeToInteractive', condition: value => value > 3.5 },
+      { dataKey: 'pageSize', translationKey: 'pageSize', condition: value => value > 2.5 },
+      { dataKey: 'pageRequests', translationKey: 'requests', condition: value => value > 50 }
+    ],
+    seo: [
+      { dataKey: 'indexable', translationKey: 'permissionToIndex' },
+      { dataKey: 'hasMetaDescription', translationKey: 'hasMetaDescription' },
+      { dataKey: 'usesCleanContent', translationKey: 'contentPlugins' },
+      { dataKey: 'hasDescriptiveLinks', translationKey: 'descriptiveLinkText' }
+    ],
+    mobile: [
+        { 
+          dataKey: 'responsive', 
+          translationKey: 'isResponsive',
+          condition: value => value === false 
+        },
+        { 
+          dataKey: 'viewportMeta', 
+          translationKey: 'hasViewportMeta',
+          condition: value => value === false
+        },
+        { 
+          dataKey: 'tapTargets', 
+          translationKey: 'hasTapTargets',
+          condition: value => value === false
+        },
+        { 
+          dataKey: 'mobileSpeed', 
+          translationKey: 'mobileSpeed',
+          condition: value => value === false 
+        },
+        { 
+          dataKey: 'fontSizes', 
+          translationKey: 'fontSizes',
+          condition: value => value === false
+        },
+        { 
+          dataKey: 'contentFitting', 
+          translationKey: 'contentFitting',
+          condition: value => value === false
+        }
+      ],
+    security: [
+        { 
+          dataKey: 'sslStatus', 
+          translationKey: 'hasSSL',
+          condition: status => !status || status !== 'Valid',
+          formatValue: value => {
+            if (!value) return '✗ Not Available';
+            return value === 'Valid' ? '✓ Valid' : `✗ ${value}`;
+          }
+        },
+        { 
+          dataKey: 'https', 
+          translationKey: 'usesHTTPS',
+          condition: value => !value,
+          formatValue: value => value ? '✓ Enabled' : '✗ Disabled'
+        },
+        { 
+          dataKey: 'securityHeaders', 
+          translationKey: 'usesSecurityHeaders',
+          condition: value => !value || value === 'Disabled' || value === 'Error',
+          formatValue: value => {
+            if (!value) return '✗ Not Available';
+            return value === 'Enabled' ? '✓ Enabled' : `✗ ${value}`;
+          }
+        },
+        { 
+          dataKey: 'firewallDetected', 
+          translationKey: 'hasWAF',
+          condition: value => !value,
+          formatValue: (value, data) => value ? `✓ ${data.firewallName || 'Detected'}` : '✗ Not Detected'
+        },
+        { 
+          dataKey: 'corsPolicy', 
+          translationKey: 'corsPolicy',
+          condition: value => !value || value === 'Not configured' || value === 'Public' || value === 'Error',
+          formatValue: value => {
+            if (!value) return '✗ Not Available';
+            if (value === 'Restricted') return '✓ Restricted';
+            if (value === 'Public') return '⚠ Public';
+            return `✗ ${value}`;
+          }
+        },
+        { 
+          dataKey: 'cookieSecurity', 
+          translationKey: 'cookieSecurity',
+          condition: value => !value || !value.secure || !value.httpOnly || value.sameSite === 'None',
+          formatValue: value => {
+            if (!value) return '✗ Not Available';
+            return [
+              `Secure: ${value.secure ? '✓' : '✗'}`,
+              `HttpOnly: ${value.httpOnly ? '✓' : '✗'}`,
+              `SameSite: ${value.sameSite}`
+            ].join(', ');
+          }
+        },
+        { 
+          dataKey: 'xssProtection', 
+          translationKey: 'xssProtection',
+          condition: value => !value || value === 'Not configured' || value === 'Error',
+          formatValue: value => {
+            if (!value) return '✗ Not Available';
+            return value === 'Not configured' ? '✗ Not Configured' : `✓ ${value}`;
+          }
+        },
+        { 
+          dataKey: 'contentSecurityPolicy',  // Match backend property name exactly
+          translationKey: 'contentSecurity',  // Translation key remains the same
+          condition: value => !value || value === 'Not configured' || value === 'Error',
+          formatValue: value => {
+            if (!value) return '✗ Not Available';
+            return value === 'Configured' ? '✓ Configured' : `✗ ${value}`;
+          }
+        }
+      ]
+  };
 
   // Performance checks
-  const perf = performanceData || {};
-  const perfCheck = [
-    { key: 'requests', value: perf.requests },
-    { key: 'pageSize', value: perf.pageSize },
-    { key: 'pageSpeed', value: perf.pageLoadTime },
-    { key: 'firstContentfulPaint', value: perf.firstContentfulPaint },
-    { key: 'speedIndex', value: perf.speedIndex },
-    { key: 'timeToInteractive', value: perf.timeToInteractive }
-  ];
-
-  perfCheck.forEach(({ key, value }) => {
-    const rule = t.performance[key];
-    if (!rule || seen.has(key) || typeof value !== 'number') return;
-
-    if (key === 'pageSpeed') {
-      const performanceMessage = value < 5 ? t.status.slightDelay : t.status.sluggish;
-      if (value > rule.threshold) {
-        rows.push({
-          category: t.categories.performance,
-          label: rule.label,
-          current: performanceMessage,
-          recommendation: rule.recommendation,
-          notes: rule.notes
-        });
-        seen.add(key);
-      }
-      return;
-    }
-
-    if (value > rule.threshold) {
+  trackedMetrics.performance.forEach(({ dataKey, translationKey, condition }) => {
+    const value = performanceData?.[dataKey];
+    const rule = t.performance[translationKey];
+    
+    if (value !== undefined && value !== null && condition(value) && rule) {
+      const displayValue = dataKey === 'performanceScore' 
+        ? `${value}/100`
+        : dataKey === 'pageRequests'
+          ? `${value} requests`
+          : dataKey === 'pageSize'
+            ? `${value} MB`
+            : `${value}s`;
+      
       rows.push({
         category: t.categories.performance,
         label: rule.label,
-        current: value.toFixed(2),
+        current: displayValue,
         recommendation: rule.recommendation,
         notes: rule.notes
       });
-      seen.add(key);
     }
   });
 
   // SEO checks
-  const seo = seoData || {};
-  Object.entries(t.seo).forEach(([key, rule]) => {
-    if (seo[key] === false) {
+  trackedMetrics.seo.forEach(({ dataKey, translationKey }) => {
+    const value = seoData?.[dataKey];
+    const rule = t.seo[translationKey];
+    
+    if (rule && (value === false || value === null || value === undefined)) {
       rows.push({
         category: t.categories.seo,
         label: rule.label,
@@ -351,94 +187,85 @@ const RecommendationSection = ({
   });
 
   // Mobile checks
-  const mobile = mobileData || {};
-  Object.entries(t.mobile).forEach(([key, rule]) => {
-    if (mobile[key] === false) {
-      rows.push({
-        category: t.categories.mobile,
-        label: rule.label,
-        current: t.status.fail,
-        recommendation: rule.recommendation,
-        notes: rule.notes
-      });
+  trackedMetrics.mobile.forEach(({ dataKey, translationKey, condition }) => {
+    const value = mobileData?.[dataKey];
+    const rule = t.mobile[translationKey];
+    
+    if (rule) {
+      if (condition) {
+        // For numeric metrics like mobileSpeed
+        if (value !== undefined && value !== null && condition(value)) {
+          rows.push({
+            category: t.categories.mobile,
+            label: rule.label,
+            current: `${value}${dataKey === 'mobileSpeed' ? '/100' : ''}`,
+            recommendation: rule.recommendation,
+            notes: rule.notes
+          });
+        }
+      } else {
+        // For boolean metrics
+        if (value === false || value === null || value === undefined) {
+          rows.push({
+            category: t.categories.mobile,
+            label: rule.label,
+            current: t.status.fail,
+            recommendation: rule.recommendation,
+            notes: rule.notes
+          });
+        }
+      }
     }
   });
-  
-  // Security checks - properly mapped to backend structure
-  const sec = securityData || {};
-  const securityChecks = {
-    ssl: sec.sslStatus !== 'Valid',
-    https: !sec.https,
-    headers: sec.securityHeaders === 'Disabled',
-    firewall: !sec.firewallDetected,
-    cors: sec.corsPolicy === 'Not configured',
-    xss: sec.xssProtection === 'Not configured',
-    csp: sec.contentSecurityPolicy === 'Not configured',
-    cookie: !(sec.cookieSecurity?.secure && sec.cookieSecurity?.httpOnly)
-  };
 
-  Object.entries(securityChecks).forEach(([key, isFailed]) => {
-    if (isFailed && t.security[key]) {
+  // Security checks
+  trackedMetrics.security.forEach(({ dataKey, translationKey, condition, formatValue }) => {
+    const value = securityData?.[dataKey];
+    const rule = t.security[translationKey];
+    
+    if (rule && value !== undefined && value !== null && condition(value)) {
       rows.push({
         category: t.categories.security,
-        label: t.security[key].label,
-        current: t.status.fail,
-        recommendation: t.security[key].recommendation,
-        notes: t.security[key].notes
+        label: rule.label,
+        current: formatValue ? formatValue(value, securityData) : String(value),
+        recommendation: rule.recommendation,
+        notes: rule.notes
       });
     }
   });
 
   if (!rows.length) return null;
 
-  const categories = [
-    t.categories.performance,
-    t.categories.seo,
-    t.categories.mobile,
-    t.categories.security
-  ];
-
   return (
-    <Box sx={{ mt: 6 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
+    <Box mt={4}>
+      <Typography variant="h5" gutterBottom fontWeight={600}>
         {t.title}
       </Typography>
-      <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+      <Typography variant="body1" mb={2}>
         {t.description}
       </Typography>
-      {categories.map((category) => {
-        const categoryRows = rows.filter((row) => row.category === category);
-        if (categoryRows.length === 0) return null;
-        return (
-          <Box key={category} sx={{ mb: 4 }}>
-            <Typography variant="h5" sx={{ fontWeight: 500 }}>
-              {category}
-            </Typography>
-            <Paper elevation={2} sx={{ overflowX: 'auto' }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                    <TableCell><strong>{t.tableHeaders.metric}</strong></TableCell>
-                    <TableCell><strong>{t.tableHeaders.current}</strong></TableCell>
-                    <TableCell><strong>{t.tableHeaders.recommended}</strong></TableCell>
-                    <TableCell><strong>{t.tableHeaders.notes}</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {categoryRows.map((row, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{row.label}</TableCell>
-                      <TableCell>{row.current}</TableCell>
-                      <TableCell>{row.recommendation}</TableCell>
-                      <TableCell>{row.notes}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Paper>
-          </Box>
-        );
-      })}
+      <Paper>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>{t.tableHeaders.metric}</TableCell>
+              <TableCell>{t.tableHeaders.current}</TableCell>
+              <TableCell>{t.tableHeaders.recommended}</TableCell>
+              <TableCell>{t.tableHeaders.notes}</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map((row, index) => (
+              <TableRow key={index}>
+                <TableCell><strong>{row.category}</strong>: {row.label}</TableCell>
+                <TableCell>{row.current}</TableCell>
+                <TableCell>{row.recommendation}</TableCell>
+                <TableCell>{row.notes}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
     </Box>
   );
 };
@@ -448,11 +275,7 @@ RecommendationSection.propTypes = {
   seoData: PropTypes.object,
   mobileData: PropTypes.object,
   securityData: PropTypes.object,
-  language: PropTypes.oneOf(['en', 'es'])
+  language: PropTypes.string
 };
 
-RecommendationSection.defaultProps = {
-  language: 'en'
-};
-
-export default React.memo(RecommendationSection);
+export default RecommendationSection;
