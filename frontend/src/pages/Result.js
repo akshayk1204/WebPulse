@@ -3,9 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Paper, Button, LinearProgress, Alert,
   CircularProgress, Grid, Card, CardContent, List, ListItem, ListItemIcon, Divider,
-  IconButton, Tooltip, AppBar, Toolbar
+  IconButton, Tooltip
 } from '@mui/material';
 import { styled } from '@mui/system';
+import ECLogo from '../assets/EC-logo.svg';
 import { Translate } from '@mui/icons-material';
 import Gauge from '../components/Gauge';
 import { calculateSeoScore, getScoreColor, calculateMobileScore, calculateSecurityScore } from '../utils/scoreUtils';
@@ -15,24 +16,22 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import ShieldIcon from '@mui/icons-material/Shield';
 import DevicesIcon from '@mui/icons-material/Devices';
 import PublicIcon from '@mui/icons-material/Public';
-//import SEOSection from '../components/SEOSection';
 import SecuritySection from '../sections/securitySection';
-//import RecommendationSection from '../sections/RecommendationSection';
+
 const PerformanceSection = React.lazy(() => import('../sections/PerformanceSection'));
 const SEOSection = React.lazy(() => import('../sections/SEOSection'));
 const MobileSection = React.lazy(() => import('../sections/MobileSection'));
-//const SecuritySection = React.lazy(() => import('../sections/securitySection'));
-const RecommendationSection = React.lazy(() => import('../sections/RecommendationSection'));
 
 // Translation dictionaries
 const translations = {
   en: {
     overallScore: "Overall Score",
-    performance: "PERFORMANCE",
+    performance: "Performance",
+    //performanceTitle: "Performance",
     mobileTitle: "Mobile Optimization",
     seo: "SEO",
-    mobile: "MOBILE",
-    security: "SECURITY",
+    mobile: "Mobile",
+    security: "Security",
     webPulse: "WebPulse",
     poweredBy: "powered by Edgecast",
     websiteAnalysis: "Website Analysis",
@@ -50,8 +49,42 @@ const translations = {
     securityDescription: "Trust is your hardest currency—airtight security turns visitors into confident customers.",
     noDataFound: "No analysis data found. Please analyze a website first.",
     backToHome: "Back to Home",
-
-    seoTagline: "Boost discoverability—optimize how your site is found and displayed in search results.", // Add this
+    seoTagline: "Boost discoverability—optimize how your site is found and displayed in search results.",
+    recommendations: {
+      performance: "Performance Recommendations",
+      seo: "SEO Recommendations",
+      mobile: "Mobile Recommendations",
+      security: "Security Recommendations",
+      noIssues: "No major recommendations. Your site is performing well in this area!",
+      performanceRecs: [
+        "Use a Content Delivery Network (CDN) to accelerate content delivery globally",
+        "Optimize images and use modern formats like WebP/AVIF",
+        "Minify and bundle CSS and JavaScript files",
+        "Implement caching strategies for static assets",
+        "Reduce server response times"
+      ],
+      seoRecs: [
+        "Add descriptive meta titles and descriptions",
+        "Ensure proper heading structure (H1, H2, H3)",
+        "Add alt text to images for better accessibility",
+        "Create a sitemap.xml and robots.txt file",
+        "Improve internal linking structure"
+      ],
+      mobileRecs: [
+        "Ensure responsive design works on all device sizes",
+        "Optimize touch targets for mobile users",
+        "Reduce content shifting during page load",
+        "Use responsive images with proper srcset attributes",
+        "Avoid intrusive interstitials on mobile"
+      ],
+      securityRecs: [
+        "Implement HTTPS across your entire site",
+        "Add security headers (CSP, X-Frame-Options, etc.)",
+        "Keep all software and dependencies up to date",
+        "Implement a Web Application Firewall (WAF)",
+        "Regularly scan for vulnerabilities"
+      ]
+    },
     solutions: {
       cdn: "Content Delivery Network (CDN): Accelerate content delivery globally with our high-performance CDN",
       edgeCompute: "Edge Compute: Run logic at the edge for faster response times and reduced origin load",
@@ -70,11 +103,12 @@ const translations = {
   },
   es: {
     overallScore: "Puntuación General",
-    performance: "RENDIMIENTO",
+    performance: "Rendimiento",
+    //performanceTitle: "Rendimiento",
     seo: "SEO",
-    mobile: "MÓVIL",
+    mobile: "Móvil",
     mobileTitle: "Optimización Móvil",
-    security: "SEGURIDAD",
+    security: "Seguridad",
     webPulse: "WebPulse",
     poweredBy: "con tecnología de Edgecast",
     websiteAnalysis: "Análisis de Sitio Web",
@@ -92,7 +126,42 @@ const translations = {
     securityDescription: "La confianza es su moneda más valiosa: una seguridad hermética convierte a los visitantes en clientes seguros.",
     noDataFound: "No se encontraron datos de análisis. Por favor, analice un sitio web primero.",
     backToHome: "Volver al Inicio",
-    seoTagline: "Impulsa la descubribilidad—optimiza cómo se encuentra y muestra tu sitio en los resultados de búsqueda.", // Add this
+    seoTagline: "Impulsa la descubribilidad—optimiza cómo se encuentra y muestra tu sitio en los resultados de búsqueda.",
+    recommendations: {
+      performance: "Recomendaciones de Rendimiento",
+      seo: "Recomendaciones SEO",
+      mobile: "Recomendaciones Móviles",
+      security: "Recomendaciones de Seguridad",
+      noIssues: "No hay recomendaciones importantes. ¡Su sitio funciona bien en esta área!",
+      performanceRecs: [
+        "Use una Red de Entrega de Contenido (CDN) para acelerar la entrega de contenido globalmente",
+        "Optimice imágenes y use formatos modernos como WebP/AVIF",
+        "Minifique y agrupe archivos CSS y JavaScript",
+        "Implemente estrategias de caché para activos estáticos",
+        "Reduzca los tiempos de respuesta del servidor"
+      ],
+      seoRecs: [
+        "Agregue títulos y descripciones meta descriptivos",
+        "Asegure una estructura de encabezados adecuada (H1, H2, H3)",
+        "Agregue texto alternativo a las imágenes para mejor accesibilidad",
+        "Cree un archivo sitemap.xml y robots.txt",
+        "Mejore la estructura de enlaces internos"
+      ],
+      mobileRecs: [
+        "Asegure que el diseño responsivo funcione en todos los tamaños de dispositivos",
+        "Optimice los objetivos táctiles para usuarios móviles",
+        "Reduzca el desplazamiento de contenido durante la carga de la página",
+        "Use imágenes responsivas con atributos srcset adecuados",
+        "Evite intersticiales intrusivos en móviles"
+      ],
+      securityRecs: [
+        "Implemente HTTPS en todo su sitio",
+        "Agregue encabezados de seguridad (CSP, X-Frame-Options, etc.)",
+        "Mantenga todo el software y dependencias actualizadas",
+        "Implemente un Firewall de Aplicaciones Web (WAF)",
+        "Escanee regularmente en busca de vulnerabilidades"
+      ]
+    },
     solutions: {
       cdn: "Red de Entrega de Contenido (CDN): Acelera la entrega de contenido globalmente con nuestra CDN de alto rendimiento",
       edgeCompute: "Edge Compute: Ejecuta lógica en el edge para tiempos de respuesta más rápidos y menor carga en el origen",
@@ -135,7 +204,7 @@ const MainContent = styled('div')(({ theme }) => ({
   marginLeft: '25%',
   width: '75%',
   padding: theme.spacing(4),
-  backgroundColor: '#E0E7F7 ',
+  backgroundColor: '#E0E7F7',
   [theme.breakpoints.down('lg')]: {
     marginLeft: '30%',
     width: '70%'
@@ -157,6 +226,60 @@ const SectionHeader = styled(Box)(({ theme }) => ({
     marginBottom: theme.spacing(2)
   }
 }));
+
+const SectionRecommendations = ({ score, section, language }) => {
+  const t = translations[language];
+  
+  const getRecommendations = () => {
+    if (score >= 80) {
+      return [t.recommendations.noIssues];
+    }
+
+    switch(section) {
+      case 'performance':
+        return t.recommendations.performanceRecs;
+      case 'seo':
+        return t.recommendations.seoRecs;
+      case 'mobile':
+        return t.recommendations.mobileRecs;
+      case 'security':
+        return t.recommendations.securityRecs;
+      default:
+        return [];
+    }
+  };
+
+  const recommendations = getRecommendations();
+
+  return (
+    <Box sx={{ 
+      mt: 4, 
+      mb: 6,
+      backgroundColor: '#f5f7ff',
+      borderRadius: 2,
+      p: 3,
+      borderLeft: '4px solid',
+      borderColor: 'primary.main'
+    }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+        {t.recommendations[section]}
+      </Typography>
+      
+      <List dense>
+        {recommendations.map((rec, index) => (
+          <ListItem key={index} sx={{ py: 0.5 }}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <CheckCircleIcon color="primary" fontSize="small" />
+            </ListItemIcon>
+            <Typography variant="body1">
+              {rec}
+            </Typography>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+};
 
 const EdgecastHelpSection = ({ domain, language }) => {
   const t = translations[language];
@@ -418,8 +541,6 @@ const Result = () => {
   const seoData = state?.seo?.data || state?.seo || {};
   const securityData = state?.security?.data || state?.security || {};
   const mobileData = state?.mobile?.data || state?.mobile || {};
-  
-  console.log("Security data in Result.js:", securityData);
 
   const performanceScore = performanceData?.performanceScore || 0;
   const seoScore = calculateSeoScore(seoData);
@@ -446,20 +567,43 @@ const Result = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
-      <AppBar position="fixed" color="transparent" elevation={0} sx={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
-        <Toolbar sx={{ justifyContent: 'flex-end' }}>
-          <Tooltip title={language === 'en' ? "Cambiar a Español" : "Switch to English"}>
-            <IconButton onClick={toggleLanguage} color="inherit">
-              <Translate />
-              <Typography variant="body2" sx={{ ml: 1 }}>
-                {language === 'en' ? 'ES' : 'EN'}
-              </Typography>
-            </IconButton>
-          </Tooltip>
-        </Toolbar>
-      </AppBar>
+      {/* Floating Language Toggle Button */}
+      <Box sx={{
+        position: 'fixed',
+        top: 16,
+        right: 16,
+        zIndex: 1300,
+        backgroundColor: '#fff',
+        borderRadius: '50%',
+        boxShadow: 3,
+        p: 1
+      }}>
+        <Tooltip title={language === 'en' ? "Cambiar a Español" : "Switch to English"}>
+          <IconButton onClick={toggleLanguage} color="primary" size="small">
+            <Translate />
+          </IconButton>
+        </Tooltip>
+      </Box>
 
       <SidePanel elevation={3}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-start', 
+          p: 3,
+          pb: 1,
+          mb: 2,
+          borderBottom: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <img 
+            src={ECLogo} 
+            alt="Edgecast Logo" 
+            style={{ 
+              height: '32px', 
+              width: 'auto',
+              filter: 'brightness(0) invert(1)'
+            }} 
+          />
+        </Box>
         <Box sx={{ textAlign: 'center', p: 3 }}>
           <Typography variant="h4" gutterBottom sx={{ color: '#fff', fontWeight: 600 }}>{domain}</Typography>
           <Box sx={{ position: 'relative', width: 180, height: 180, mx: 'auto', mb: 4 }}>
@@ -482,20 +626,20 @@ const Result = () => {
 
           <Box sx={{ textAlign: 'left', px: 2 }}>
             {[
-              { label: t.performance, score: performanceScore },
-              { label: t.seo, score: seoScore },
-              { label: t.mobile, score: mobileScore },
-              { label: t.security, score: securityScore }
+              { label: t.performance, score: performanceScore, section: 'performance' },
+              { label: t.seo, score: seoScore, section: 'seo' },
+              { label: t.mobile, score: mobileScore, section: 'mobile' },
+              { label: t.security, score: securityScore, section: 'security' }
             ].map((item, index) => (
               <Box key={index} sx={{ mb: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="h6" sx={{ color: '#fff' }}>{item.label}</Typography>
                   <Typography variant="h6" sx={{ color: '#fff' }}>{item.score}/100</Typography>
                 </Box>
-                <LinearProgress variant="determinate" value={item.score} sx={{ 
-                  height: 8, 
-                  backgroundColor: 'rgba(255,255,255,0.3)', 
-                  '& .MuiLinearProgress-bar': { backgroundColor: getScoreColor(item.score) } 
+                <LinearProgress variant="determinate" value={item.score} sx={{
+                  height: 8,
+                  backgroundColor: 'rgba(255,255,255,0.3)',
+                  '& .MuiLinearProgress-bar': { backgroundColor: getScoreColor(item.score) }
                 }} />
               </Box>
             ))}
@@ -504,22 +648,8 @@ const Result = () => {
       </SidePanel>
 
       <MainContent id="report-content">
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          mt={4}
-          mb={4}
-        >
-          <Box
-            display="flex"
-            alignItems="baseline"
-            justifyContent="flex-start"
-            width="100%"
-            maxWidth="1200px"
-            px={2}
-          >
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mt={4} mb={4}>
+          <Box display="flex" alignItems="baseline" justifyContent="flex-start" width="100%" maxWidth="1200px" px={2}>
             <Typography variant="h3" sx={{ fontWeight: 'bold', mr: 1 }}>
               {t.webPulse}
             </Typography>
@@ -527,29 +657,32 @@ const Result = () => {
               {t.poweredBy}
             </Typography>
           </Box>
-
-          <Typography
-            variant="h4"
-            sx={{ fontWeight: 'medium', textAlign: 'center', mt: 3 }}
-          >
+          <Typography variant="h4" sx={{ fontWeight: 'medium', textAlign: 'center', mt: 3 }}>
             {t.websiteAnalysis}
           </Typography>
         </Box>
 
         <Suspense fallback={<CircularProgress />}>
-          <SectionHeader>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-              {t.performanceTitle}
-            </Typography>
-          </SectionHeader>
+          {/* Performance Section */}
           <div id="performance-section">
-           <PerformanceSection data={performanceData} language={language} />
+            <PerformanceSection data={performanceData} language={language} />
           </div>
+          <SectionRecommendations 
+            score={performanceScore} 
+            section="performance" 
+            language={language} 
+          />
 
-
+          {/* SEO Section */}
 
           <SEOSection seoData={seoData} language={language} domain={domain} />
+          <SectionRecommendations 
+            score={seoScore} 
+            section="seo" 
+            language={language} 
+          />
 
+          {/* Mobile Section */}
           <SectionHeader>
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
               {t.mobileTitle}
@@ -558,7 +691,13 @@ const Result = () => {
           <div id="mobile-section">
             <MobileSection mobile={mobileData} language={language} />
           </div>
+          <SectionRecommendations 
+            score={mobileScore} 
+            section="mobile" 
+            language={language} 
+          />
 
+          {/* Security Section */}
           <SectionHeader>
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
               {t.security}
@@ -570,16 +709,11 @@ const Result = () => {
           <div id="security-section">
             <SecuritySection security={securityData} language={language} />
           </div>
-          
-          <div id="recommendation-section">
-            <RecommendationSection
-              performanceData={performanceData}
-              seoData={seoData}
-              mobileData={mobileData}
-              securityData={securityData}
-              language={language}
-            />
-          </div>
+          <SectionRecommendations 
+            score={securityScore} 
+            section="security" 
+            language={language} 
+          />
 
           <EdgecastHelpSection domain={domain} language={language} />
         </Suspense>

@@ -29,7 +29,7 @@ const wafSignatures = {
   },
   'Edgecast': {
     headers: ['x-edgecast', 'x-cache', 'x-edgecache'],
-    serverIncludes: ['Edgecast']
+    serverIncludes: ['Edgecast', 'ECAcc']
   },
   'Edgio': {
     headers: ['x-edgio-request-id', 'x-edgio-cache-status'],
