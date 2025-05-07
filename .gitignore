@@ -1,6 +1,10 @@
-node_modules
-.DS_Store
-# Ignore .env files everywhere
-.env*
-!.env.example
-!/frontend/**
+# Add these exact lines to your .gitignore (if not already present)
+echo "
+# Environment files
+.env
+frontend/.env
+backend/.env
+" >> .gitignore
+
+# Then stage the .gitignore changes
+git add .gitignore
