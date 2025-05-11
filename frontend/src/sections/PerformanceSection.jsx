@@ -17,7 +17,7 @@ const translations = {
     performance: "Performance",
     tagline: "Speed shapes success—a faster site drives higher rankings, happier visitors, more conversions, and bigger revenue.",
     loading: "Loading performance data...",
-    testResults: "Test results from",
+    //testResults: "Test results from",
     excellent: "Excellent",
     good: "Good",
     fair: "Fair",
@@ -42,49 +42,49 @@ const translations = {
         },
         explanation: "Measures how fast your content starts to appear. Faster FCP means users see something sooner."
       },
-      speedIndex: {
-        label: "Speed Index (s)",
+      largestContentfulPaint: {
+        label: "Largest Contentful Paint (s)",
         message: {
-          fast: "Smooth and fast!",
-          moderate: "Slight delay",
-          slow: "Feels sluggish, speed it up!"
+          fast: "Fast content rendering!",
+          moderate: "Not bad, can improve.",
+          slow: "LCP is slow—optimize images or layout!"
         },
-        explanation: "Shows how quickly your visible content loads. A lower number = faster loading experience."
+        explanation: "LCP measures how fast your main content becomes visible. Critical for perceived performance."
       },
-      timeToInteractive: {
-        label: "Time to Interactive (s)",
+      timeToFirstByte: {
+        label: "Time to First Byte (s)",
         message: {
-          fast: "You're interactive fast!",
-          moderate: "Almost there!",
-          slow: "Slow down, it's taking a while!"
+          fast: "Server is snappy!",
+          moderate: "Acceptable latency",
+          slow: "Slow server response—consider tuning backend."
         },
-        explanation: "Tells how soon users can click, scroll, or type. Slow TTI makes a site feel frozen or laggy."
+        explanation: "How long it takes the server to respond. Faster TTFB improves load start."
       },
-      pageSize: {
-        label: "Page Size (MB)",
+      cumulativeLayoutShift: {
+        label: "Cumulative Layout Shift",
         message: {
-          small: "You're cruising with a light load!",
-          moderate: "Could be lighter!",
-          large: "Time to trim some weight!"
+          low: "Stable and steady!",
+          medium: "Some unexpected shifts",
+          high: "Too jumpy! Fix layout shifts."
         },
-        explanation: "Total weight of your page. Smaller size = faster load time and lower data use, especially on mobile."
+        explanation: "Measures visual stability—less layout shift means smoother experience."
       },
-      requests: {
-        label: "Requests",
+      interactionToNextPaint: {
+        label: "Interaction to Next Paint (s)",
         message: {
-          few: "Nice and tidy calls!",
-          moderate: "Moderate, but could be better",
-          many: "Way too many requests, slow down!"
+          fast: "Responsive interactions!",
+          moderate: "Slightly delayed",
+          slow: "Laggy interaction—optimize responsiveness"
         },
-        explanation: "Number of individual files (images, scripts, etc.) the browser needs to load. Fewer requests = faster site."
-      }
+        explanation: "INP reflects latency of your site's interactions. Crucial for interactivity."
+      }      
     }
   },
   es: {
     performance: "Rendimiento",
     tagline: "La velocidad moldea el éxito: un sitio más rápido genera mejores clasificaciones, visitantes más felices, más conversiones y mayores ingresos.",
     loading: "Cargando datos de rendimiento...",
-    testResults: "Resultados de prueba de",
+    //testResults: "Resultados de prueba de",
     excellent: "Excelente",
     good: "Bueno",
     fair: "Regular",
@@ -109,41 +109,41 @@ const translations = {
         },
         explanation: "Mide qué tan rápido comienza a aparecer su contenido. Un FCP más rápido significa que los usuarios ven algo antes."
       },
-      speedIndex: {
-        label: "Índice de Velocidad (s)",
+      largestContentfulPaint: {
+        label: "Pintura con Contenido Principal (s)",
         message: {
-          fast: "¡Suave y rápido!",
-          moderate: "Ligero retraso",
-          slow: "¡Se siente lento, aceléralo!"
+          fast: "¡Renderizado rápido de contenido!",
+          moderate: "No está mal, pero puede mejorar.",
+          slow: "LCP es lento—¡optimiza imágenes o el diseño!"
         },
-        explanation: "Muestra qué tan rápido carga su contenido visible. Un número más bajo = experiencia de carga más rápida."
+        explanation: "El LCP mide qué tan rápido se vuelve visible su contenido principal. Es fundamental para el rendimiento percibido."
       },
-      timeToInteractive: {
-        label: "Tiempo hasta Interactividad (s)",
+      timeToFirstByte: {
+        label: "Tiempo hasta el Primer Byte (s)",
         message: {
-          fast: "¡Eres interactivo rápidamente!",
-          moderate: "¡Casi listo!",
-          slow: "¡Despacio, está tardando un poco!"
+          fast: "¡Servidor rápido!",
+          moderate: "Latencia aceptable",
+          slow: "Respuesta del servidor lenta—considera optimizar el backend."
         },
-        explanation: "Indica qué tan pronto los usuarios pueden hacer clic, desplazarse o escribir. Un TTI lento hace que un sitio se sienta congelado o lento."
+        explanation: "Tiempo que tarda el servidor en responder. Un TTFB más rápido mejora el inicio de carga."
       },
-      pageSize: {
-        label: "Tamaño de Página (MB)",
+      cumulativeLayoutShift: {
+        label: "Cambio de Diseño Acumulado",
         message: {
-          small: "¡Estás navegando con una carga ligera!",
-          moderate: "¡Podría ser más ligero!",
-          large: "¡Es hora de recortar algo de peso!"
+          low: "¡Estable y sólido!",
+          medium: "Algunos cambios inesperados",
+          high: "¡Demasiado movimiento! Arregla los cambios de diseño."
         },
-        explanation: "Peso total de su página. Tamaño más pequeño = tiempo de carga más rápido y menor uso de datos, especialmente en móviles."
+        explanation: "Mide la estabilidad visual—menos cambio de diseño significa una experiencia más fluida."
       },
-      requests: {
-        label: "Solicitudes",
+      interactionToNextPaint: {
+        label: "Interacción hasta la Próxima Pintura (s)",
         message: {
-          few: "¡Llamadas ordenadas y limpias!",
-          moderate: "Moderado, pero podría ser mejor",
-          many: "¡Demasiadas solicitudes, disminuye la velocidad!"
+          fast: "¡Interacciones receptivas!",
+          moderate: "Ligeramente retrasado",
+          slow: "Interacción lenta—optimiza la capacidad de respuesta"
         },
-        explanation: "Número de archivos individuales (imágenes, scripts, etc.) que el navegador necesita cargar. Menos solicitudes = sitio más rápido."
+        explanation: "INP refleja la latencia de las interacciones en su sitio. Es crucial para la interactividad."
       }
     }
   }
@@ -153,35 +153,32 @@ const normalizeScore = (label, value) => {
   if (value === undefined || value === null || isNaN(value)) return 50;
 
   switch (label) {
-    case 'Page Size (MB)':
-    case 'Tamaño de Página (MB)':
-      if (value <= 2) return 100;
-      if (value <= 3.5) return 60;
-      return 30;
-
-    case 'Requests':
-    case 'Solicitudes':
-      if (value <= 50) return 100;
-      if (value <= 90) return 60;
-      return 30;
-
     case 'Performance Score':
     case 'Puntuación de Rendimiento':
       return Math.min(100, Math.max(0, value));
-
+  
     case 'First Contentful Paint (s)':
     case 'Primera Pintura con Contenido (s)':
-    case 'Speed Index (s)':
-    case 'Índice de Velocidad (s)':
-    case 'Time to Interactive (s)':
-    case 'Tiempo hasta Interactividad (s)':
+    case 'Largest Contentful Paint (s)':
+    case 'Tiempo hasta Pintura con Contenido Principal (s)':
+    case 'Time to First Byte (s)':
+    case 'Tiempo hasta el Primer Byte (s)':
+    case 'Interaction to Next Paint (s)':
+    case 'Interacción hasta la Próxima Pintura (s)':
       if (value <= 2) return 100;
       if (value <= 4) return 60;
       return 30;
-
+  
+    case 'Cumulative Layout Shift':
+    case 'Cambio de Diseño Acumulado':
+      if (value <= 0.1) return 100;
+      if (value <= 0.25) return 60;
+      return 30;
+  
     default:
       return 50;
   }
+  
 };
 
 const getGaugeColor = (score) => {
@@ -224,77 +221,77 @@ const PerformanceSection = ({ data, language = 'en' }) => {
       value: data.performanceScore,
       display: `${data.performanceScore}/100`,
       icon: <FaBolt size={28} />,
-      messageLine: data.performanceScore >= 90 
+      messageLine: data.performanceScore >= 90
         ? t.metrics.performanceScore.message.excellent
-        : data.performanceScore >= 75 
+        : data.performanceScore >= 75
           ? t.metrics.performanceScore.message.good
-          : data.performanceScore >= 50 
+          : data.performanceScore >= 50
             ? t.metrics.performanceScore.message.needsImprovement
             : t.metrics.performanceScore.message.poor,
       explanation: t.metrics.performanceScore.explanation,
     },
     {
       label: t.metrics.firstContentfulPaint.label,
-      value: data.firstContentfulPaint,
-      display: `${data.firstContentfulPaint}s`,
+      value: parseFloat(data.firstContentfulPaint),
+      display: data.firstContentfulPaint,
       icon: <FaPaintBrush size={28} />,
-      messageLine: data.firstContentfulPaint < 2 
+      messageLine: parseFloat(data.firstContentfulPaint) < 2
         ? t.metrics.firstContentfulPaint.message.fast
-        : data.firstContentfulPaint < 3.5 
+        : parseFloat(data.firstContentfulPaint) < 3.5
           ? t.metrics.firstContentfulPaint.message.moderate
           : t.metrics.firstContentfulPaint.message.slow,
       explanation: t.metrics.firstContentfulPaint.explanation,
     },
     {
-      label: t.metrics.speedIndex.label,
-      value: data.speedIndex,
-      display: `${data.speedIndex}s`,
+      label: t.metrics.largestContentfulPaint.label,
+      value: parseFloat(data.largestContentfulPaint),
+      display: data.largestContentfulPaint,
       icon: <FaTachometerAlt size={28} />,
-      messageLine: data.speedIndex < 3 
-        ? t.metrics.speedIndex.message.fast
-        : data.speedIndex < 5 
-          ? t.metrics.speedIndex.message.moderate
-          : t.metrics.speedIndex.message.slow,
-      explanation: t.metrics.speedIndex.explanation,
+      messageLine: parseFloat(data.largestContentfulPaint) < 2.5
+        ? t.metrics.largestContentfulPaint.message.fast
+        : parseFloat(data.largestContentfulPaint) < 4
+          ? t.metrics.largestContentfulPaint.message.moderate
+          : t.metrics.largestContentfulPaint.message.slow,
+      explanation: t.metrics.largestContentfulPaint.explanation,
     },
     {
-      label: t.metrics.timeToInteractive.label,
-      value: data.timeToInteractive,
-      display: `${data.timeToInteractive}s`,
-      icon: <FaMousePointer size={28} />,
-      messageLine: data.timeToInteractive < 2.5 
-        ? t.metrics.timeToInteractive.message.fast
-        : data.timeToInteractive < 4 
-          ? t.metrics.timeToInteractive.message.moderate
-          : t.metrics.timeToInteractive.message.slow,
-      explanation: t.metrics.timeToInteractive.explanation,
-    },
-    {
-      label: t.metrics.pageSize.label,
-      value: data.pageSize,
-      display: `${data.pageSize} MB`,
-      icon: <FaDatabase size={28} />,
-      messageLine: data.pageSize <= 2 
-        ? t.metrics.pageSize.message.small
-        : data.pageSize <= 3.5 
-          ? t.metrics.pageSize.message.moderate
-          : t.metrics.pageSize.message.large,
-      explanation: t.metrics.pageSize.explanation,
-    },
-    {
-      label: t.metrics.requests.label,
-      value: data.pageRequests,
-      display: `${data.pageRequests}`,
+      label: t.metrics.timeToFirstByte.label,
+      value: parseFloat(data.timeToFirstByte),
+      display: data.timeToFirstByte,
       icon: <FaNetworkWired size={28} />,
-      messageLine: data.pageRequests <= 50 
-        ? t.metrics.requests.message.few
-        : data.pageRequests <= 90 
-          ? t.metrics.requests.message.moderate
-          : t.metrics.requests.message.many,
-      explanation: t.metrics.requests.explanation,
+      messageLine: parseFloat(data.timeToFirstByte) < 0.5
+        ? t.metrics.timeToFirstByte.message.fast
+        : parseFloat(data.timeToFirstByte) < 1
+          ? t.metrics.timeToFirstByte.message.moderate
+          : t.metrics.timeToFirstByte.message.slow,
+      explanation: t.metrics.timeToFirstByte.explanation,
+    },
+    {
+      label: t.metrics.cumulativeLayoutShift.label,
+      value: parseFloat(data.cumulativeLayoutShift),
+      display: data.cumulativeLayoutShift,
+      icon: <FaMousePointer size={28} />,
+      messageLine: parseFloat(data.cumulativeLayoutShift) <= 0.1
+        ? t.metrics.cumulativeLayoutShift.message.low
+        : parseFloat(data.cumulativeLayoutShift) <= 0.25
+          ? t.metrics.cumulativeLayoutShift.message.medium
+          : t.metrics.cumulativeLayoutShift.message.high,
+      explanation: t.metrics.cumulativeLayoutShift.explanation,
+    },
+    {
+      label: t.metrics.interactionToNextPaint.label,
+      value: parseFloat(data.interactionToNextPaint),
+      display: data.interactionToNextPaint,
+      icon: <FaMousePointer size={28} />,
+      messageLine: parseFloat(data.interactionToNextPaint) < 2
+        ? t.metrics.interactionToNextPaint.message.fast
+        : parseFloat(data.interactionToNextPaint) < 4
+          ? t.metrics.interactionToNextPaint.message.moderate
+          : t.metrics.interactionToNextPaint.message.slow,
+      explanation: t.metrics.interactionToNextPaint.explanation,
     },
   ];
-
+  
   return (
     <>
       <SectionHeader

@@ -17,6 +17,9 @@ import ShieldIcon from '@mui/icons-material/Shield';
 import DevicesIcon from '@mui/icons-material/Devices';
 import PublicIcon from '@mui/icons-material/Public';
 import SecuritySection from '../sections/securitySection';
+import generatePdf from '../utils/generatePdf';
+import DownloadIcon from '@mui/icons-material/Download'
+import RecommendationSection from '../components/RecommendationSection';
 
 const PerformanceSection = React.lazy(() => import('../sections/PerformanceSection'));
 const SEOSection = React.lazy(() => import('../sections/SEOSection'));
@@ -227,59 +230,6 @@ const SectionHeader = styled(Box)(({ theme }) => ({
   }
 }));
 
-const SectionRecommendations = ({ score, section, language }) => {
-  const t = translations[language];
-  
-  const getRecommendations = () => {
-    if (score >= 80) {
-      return [t.recommendations.noIssues];
-    }
-
-    switch(section) {
-      case 'performance':
-        return t.recommendations.performanceRecs;
-      case 'seo':
-        return t.recommendations.seoRecs;
-      case 'mobile':
-        return t.recommendations.mobileRecs;
-      case 'security':
-        return t.recommendations.securityRecs;
-      default:
-        return [];
-    }
-  };
-
-  const recommendations = getRecommendations();
-
-  return (
-    <Box sx={{ 
-      mt: 4, 
-      mb: 6,
-      backgroundColor: '#f5f7ff',
-      borderRadius: 2,
-      p: 3,
-      borderLeft: '4px solid',
-      borderColor: 'primary.main'
-    }}>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-        {t.recommendations[section]}
-      </Typography>
-      
-      <List dense>
-        {recommendations.map((rec, index) => (
-          <ListItem key={index} sx={{ py: 0.5 }}>
-            <ListItemIcon sx={{ minWidth: 32 }}>
-              <CheckCircleIcon color="primary" fontSize="small" />
-            </ListItemIcon>
-            <Typography variant="body1">
-              {rec}
-            </Typography>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
-};
 
 const EdgecastHelpSection = ({ domain, language }) => {
   const t = translations[language];
@@ -535,12 +485,14 @@ const Result = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [language, setLanguage] = useState('en');
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [performanceData] = useState(state?.performance || null);
 
   const domain = state?.domain;
   const seoData = state?.seo?.data || state?.seo || {};
   const securityData = state?.security?.data || state?.security || {};
   const mobileData = state?.mobile?.data || state?.mobile || {};
+  const screenshotUrl = state?.screenshot;
 
   const performanceScore = performanceData?.performanceScore || 0;
   const seoScore = calculateSeoScore(seoData);
@@ -552,6 +504,27 @@ const Result = () => {
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'es' : 'en');
+  };
+
+  const handleDownloadPdf = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      await generatePdf(
+        domain,
+        {
+          overall: overallScore,
+          performance: performanceScore,
+          seo: seoScore,
+          mobile: mobileScore,
+          security: securityScore
+        }
+      );
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   if (!state || !state.domain) {
@@ -643,6 +616,40 @@ const Result = () => {
                 }} />
               </Box>
             ))}
+            
+            {/* Updated Download Button */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center',
+              mt: 4,
+              mb: 2
+            }}>
+              <Button 
+                variant="contained"
+                disabled={isGeneratingPdf}
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  width: '90%',
+                  fontWeight: 'bold',
+                  fontSize: '1rem',
+                  backgroundColor: '#FF6F59',
+                  color: '#FFFFFF',
+                  borderRadius: '4px',
+                  '&:hover': {
+                    backgroundColor: '#E65A46'
+                  },
+                  '&:disabled': {
+                    backgroundColor: '#FF6F59',
+                    opacity: 0.7
+                  }
+                }}
+                onClick={handleDownloadPdf}
+                startIcon={isGeneratingPdf ? <CircularProgress size={20} color="inherit" /> : <DownloadIcon />}
+              >
+                {isGeneratingPdf ? 'Generating Report...' : 'Download Full Report'}
+              </Button>
+            </Box>
           </Box>
         </Box>
       </SidePanel>
@@ -660,6 +667,39 @@ const Result = () => {
           <Typography variant="h4" sx={{ fontWeight: 'medium', textAlign: 'center', mt: 3 }}>
             {t.websiteAnalysis}
           </Typography>
+          
+          {screenshotUrl && (
+            <Box sx={{ 
+              mt: 4, 
+              mb: 6,
+              width: '100%',
+              maxWidth: '800px',
+              border: '1px solid #ddd',
+              borderRadius: 2,
+              overflow: 'hidden',
+              boxShadow: 3,
+              mx: 'auto'
+            }}>
+              <Typography variant="subtitle1" sx={{ 
+                backgroundColor: '#f5f5f5', 
+                p: 1, 
+                textAlign: 'center',
+                borderBottom: '1px solid #ddd'
+              }}>
+                {domain} Screenshot
+              </Typography>
+              <Box
+                component="img"
+                src={screenshotUrl}
+                alt={`${domain} screenshot`}
+                sx={{
+                  width: '100%',
+                  height: 'auto',
+                  display: 'block'
+                }}
+              />
+            </Box>
+          )}
         </Box>
 
         <Suspense fallback={<CircularProgress />}>
@@ -667,20 +707,11 @@ const Result = () => {
           <div id="performance-section">
             <PerformanceSection data={performanceData} language={language} />
           </div>
-          <SectionRecommendations 
-            score={performanceScore} 
-            section="performance" 
-            language={language} 
-          />
+          <RecommendationSection category="performance" performanceData={performanceData} language={language} />
 
           {/* SEO Section */}
-
           <SEOSection seoData={seoData} language={language} domain={domain} />
-          <SectionRecommendations 
-            score={seoScore} 
-            section="seo" 
-            language={language} 
-          />
+          <RecommendationSection category="seo" seoData={seoData} language={language} />
 
           {/* Mobile Section */}
           <SectionHeader>
@@ -691,11 +722,7 @@ const Result = () => {
           <div id="mobile-section">
             <MobileSection mobile={mobileData} language={language} />
           </div>
-          <SectionRecommendations 
-            score={mobileScore} 
-            section="mobile" 
-            language={language} 
-          />
+          <RecommendationSection category="mobile" mobileData={mobileData} language={language} />
 
           {/* Security Section */}
           <SectionHeader>
@@ -709,12 +736,7 @@ const Result = () => {
           <div id="security-section">
             <SecuritySection security={securityData} language={language} />
           </div>
-          <SectionRecommendations 
-            score={securityScore} 
-            section="security" 
-            language={language} 
-          />
-
+          <RecommendationSection category="security" securityData={securityData} language={language} />
           <EdgecastHelpSection domain={domain} language={language} />
         </Suspense>
       </MainContent>

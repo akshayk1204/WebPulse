@@ -1,117 +1,105 @@
 const axios = require('axios');
 require('dotenv').config();
 
-const WPT_API_KEY = process.env.WEBPAGETEST_API_KEY;
-const WPT_TEST_URL = 'https://www.webpagetest.org/runtest.php';
-const WPT_RESULT_URL = 'https://www.webpagetest.org/jsonResult.php';
+const PSI_API_KEY = process.env.GOOGLE_PAGESPEED_API_KEY;
+const PSI_URL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
 
-const getPageSpeed = async (domain) => {
-  if (!WPT_API_KEY) throw new Error('WebPageTest API key missing');
-
-  if (domain === 'yahoo.com') {
-    try {
-      console.log(`Fetching existing test results for yahoo.com (test ID: 250503_AiDcKG_6X2)`);
-      const result = await axios.get(WPT_RESULT_URL, {
-        params: {
-          test: '250503_AiDcKG_6X2',
-          f: 'json'
-        },
-        headers: {
-          'X-WPT-API-KEY': WPT_API_KEY
-        },
-        timeout: 15000
-      });
-
-      if (result.data.statusCode >= 400) {
-        throw new Error(result.data.statusText);
-      }
-
-      console.log('Successfully fetched yahoo.com test results');
-      return formatWebPageTestResults(result.data.data);
-
-    } catch (error) {
-      console.error('Error fetching yahoo.com test results:', error.message);
-      return {
-        error: 'Failed to get WebPageTest data for yahoo.com',
-        details: error.response?.data || error.message,
-        suggestion: 'Please try again later'
-      };
-    }
-  }
-
-  // Default values for other domains
-  return {
-    performanceScore: 90,
-    firstContentfulPaint: 2.1,
-    speedIndex: 3.4,
-    timeToInteractive: 5,
-    pageSize: '2.3',
-    pageRequests: 80,
-    screenshot: 'https://www.webpagetest.org/result/200502_XY/1_performance.png',
-    source: 'default'
-  };
+const DEFAULT_VALUES = {
+  performanceScore: 85,
+  firstContentfulPaint: '1.2s',
+  largestContentfulPaint: '2.5s',
+  timeToFirstByte: '0.5s',
+  cumulativeLayoutShift: '0.05',
+  interactionToNextPaint: '2.0s',
+  screenshot: null,
+  source: 'DefaultValues'
 };
 
-function formatWebPageTestResults(data) {
-  const median = data.median?.firstView || {};
-
-  let lighthouseScore = null;
-  if (data.lighthouse?.Performance?.score) {
-    lighthouseScore = Math.round(data.lighthouse.Performance.score * 100);
-  } else if (median.lighthousePerformanceScore) {
-    lighthouseScore = Math.round(median.lighthousePerformanceScore * 100);
-  } else {
-    lighthouseScore = calculatePerformanceScore(median);
+const getPageSpeed = async (domain) => {
+  if (!PSI_API_KEY) {
+    throw new Error('Google PageSpeed API key missing');
   }
 
-  let screenshotUrl = 'https://www.webpagetest.org/result/200502_XY/1_performance.png';
-  if (median.images?.screenShot) {
-    screenshotUrl = `https://www.webpagetest.org${median.images.screenShot}`;
+  if (isYahooDomain(domain)) {
+    console.log(`Yahoo domain detected (${domain}), returning default values`);
+    return DEFAULT_VALUES;
   }
 
-  const requestsCount = Array.isArray(median.requests)
-    ? median.requests.length
-    : (typeof median.requests === 'number' ? median.requests : 0);
+  try {
+    const result = await fetchPageSpeed(domain);
+    const formattedResults = formatPageSpeedResults(result);
 
-  const fcp = median.firstContentfulPaint ? median.firstContentfulPaint / 1000 : 0;
-  const speedIdx = median.SpeedIndex ? median.SpeedIndex / 1000 : 0;
-  const tti = median.fullyLoaded ? Math.round(median.fullyLoaded / 1000) : 0;
+    if (!formattedResults.performanceScore) {
+      throw new Error('Missing performance score from PSI response');
+    }
 
-  return {
-    performanceScore: lighthouseScore,
-    firstContentfulPaint: fcp,
-    speedIndex: speedIdx,
-    timeToInteractive: tti,
-    pageSize: median.bytesIn ? (median.bytesIn / (1024 * 1024)).toFixed(2) : '0',
-    pageRequests: requestsCount,
-    screenshot: screenshotUrl,
-    source: 'WebPageTest'
-  };
-}
-
-function calculatePerformanceScore(metrics = {}) {
-  const weights = {
-    firstContentfulPaint: 0.3,
-    SpeedIndex: 0.25,
-    interactive: 0.25,
-    bytesIn: 0.1,
-    requests: 0.1
-  };
-
-  const normalized = {
-    firstContentfulPaint: Math.min(100, Math.max(0, 100 - ((metrics.firstContentfulPaint || 3000) / 100))),
-    SpeedIndex: Math.min(100, Math.max(0, 100 - ((metrics.SpeedIndex || 3000) / 100))),
-    interactive: Math.min(100, Math.max(0, 100 - (Math.round(metrics.fullyLoaded || 5000) / 2000))),
-    bytesIn: Math.min(100, Math.max(0, 100 - ((metrics.bytesIn || 102400) / (1024 * 100)))),
-    requests: Math.min(100, Math.max(0, 100 - ((metrics.requests || 100) / 2)))
-  };
-
-  let score = 0;
-  for (const [metric, weight] of Object.entries(weights)) {
-    score += (normalized[metric] || 0) * weight;
+    console.log(`Successfully fetched new PageSpeed results for ${domain}`);
+    return formattedResults;
+  } catch (error) {
+    const msg = error.response?.data?.error?.message || error.message;
+    console.error('Error running PageSpeed test:', msg);
+    return {
+      error: 'Failed to get PageSpeed data',
+      details: msg
+    };
   }
+};
 
-  return Math.round(score);
-}
+const isYahooDomain = (domain) => {
+  const yahooDomains = [
+    'yahoo.com', 'yahoo.net', 'yahoofinance.com',
+    'yahoosports.com', 'yahoomail.com', 'flickr.com'
+  ];
 
-module.exports = { getPageSpeed };
+  try {
+    const hostname = new URL(domain.startsWith('http') ? domain : `https://${domain}`).hostname;
+    const baseDomain = hostname.split('.').slice(-2).join('.');
+    return yahooDomains.includes(baseDomain);
+  } catch (e) {
+    return false;
+  }
+};
+
+const fetchPageSpeed = async (url) => {
+  const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+
+  const response = await axios.get(PSI_URL, {
+    params: {
+      url: fullUrl,
+      key: PSI_API_KEY,
+      strategy: 'desktop',
+      category: ['performance']
+    },
+    timeout: 180000
+  });
+
+  return response.data;
+};
+
+const formatSeconds = (ms) => (ms ? (ms / 1000).toFixed(1) + 's' : 'N/A');
+const formatCLS = (val) => (val !== undefined ? val.toFixed(2) : 'N/A');
+
+const formatPageSpeedResults = (data) => {
+  try {
+    const audits = data.lighthouseResult.audits;
+
+    return {
+      performanceScore: Math.round(data.lighthouseResult.categories.performance.score * 100),
+      firstContentfulPaint: formatSeconds(audits['first-contentful-paint']?.numericValue),
+      largestContentfulPaint: formatSeconds(audits['largest-contentful-paint']?.numericValue),
+      timeToFirstByte: formatSeconds(audits['server-response-time']?.numericValue),
+      cumulativeLayoutShift: formatCLS(audits['cumulative-layout-shift']?.numericValue),
+      interactionToNextPaint: formatSeconds(audits['experimental-interaction-to-next-paint']?.numericValue),
+      screenshot: audits['final-screenshot']?.details?.data || null,
+      //source: 'PageSpeedInsights'
+    };
+  } catch (error) {
+    console.error('Error formatting PageSpeed data:', error.message);
+    return { error: 'Failed to parse PageSpeed results' };
+  }
+};
+
+module.exports = {
+  getPageSpeed,
+  isYahooDomain
+};
