@@ -19,7 +19,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import SecuritySection from '../sections/securitySection';
 import generatePdf from '../utils/generatePdf';
 import DownloadIcon from '@mui/icons-material/Download'
-import RecommendationSection from '../components/RecommendationSection';
+import RecommendationSection from '../sections/RecommendationSection';
 
 const PerformanceSection = React.lazy(() => import('../sections/PerformanceSection'));
 const SEOSection = React.lazy(() => import('../sections/SEOSection'));
@@ -517,7 +517,14 @@ const Result = () => {
           seo: seoScore,
           mobile: mobileScore,
           security: securityScore
-        }
+        },
+        {
+          performance: performanceData,
+          seo: seoData,
+          mobile: mobileData,
+          security: securityData
+        },
+        language
       );
     } catch (error) {
       console.error('PDF generation error:', error);

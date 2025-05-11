@@ -47,6 +47,7 @@ const generatePdf = async (domain, scores) => {
       pdf.rect(0, 0, pageWidth, pageHeight, 'F');
     };
 
+    // ===== COVER PAGE =====
     addDarkBackground();
 
     try {
@@ -56,7 +57,7 @@ const generatePdf = async (domain, scores) => {
         logoImg.onload = resolve;
         logoImg.onerror = reject;
       });
-      pdf.addImage(logoImg, 'SVG', pageWidth/2 - 30, 30, 60, 20);
+      pdf.addImage(logoImg, 'SVG', pageWidth / 2 - 30, 30, 60, 20);
     } catch (e) {
       console.warn('Failed to load logo, proceeding without it');
     }
@@ -64,17 +65,18 @@ const generatePdf = async (domain, scores) => {
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(textColor);
     pdf.setFontSize(28);
-    pdf.text('WebPulse Analysis', pageWidth/2, 70, { align: 'center' });
+    pdf.text('WebPulse Analysis', pageWidth / 2, 70, { align: 'center' });
 
     pdf.setFontSize(36);
     pdf.setTextColor(accentColor);
-    pdf.text(domain, pageWidth/2, 90, { align: 'center' });
+    pdf.text(domain, pageWidth / 2, 90, { align: 'center' });
 
     pdf.setFontSize(16);
     pdf.setTextColor(secondaryText);
-    pdf.text('Powered by Edgecast', pageWidth/2, 100, { align: 'center' });
-    pdf.text(`Analysis generated on ${new Date().toLocaleDateString()}`, pageWidth/2, 110, { align: 'center' });
+    pdf.text('Powered by Edgecast', pageWidth / 2, 100, { align: 'center' });
+    pdf.text(`Analysis generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 110, { align: 'center' });
 
+    // ===== EXECUTIVE SUMMARY PAGE =====
     pdf.addPage();
     addDarkBackground();
 
@@ -82,7 +84,6 @@ const generatePdf = async (domain, scores) => {
     pdf.setTextColor(accentColor);
     pdf.text('Executive Summary', 20, 30);
 
-    // Draw Overall Score gauge
     const drawCircleGauge = (x, y, label, score) => {
       const radius = 25;
       const color = getScoreColor(score);
@@ -108,7 +109,9 @@ const generatePdf = async (domain, scores) => {
     pdf.setTextColor(secondaryText);
     pdf.text(
       'Focus your efforts on the weakest scoring area while maintaining strength in top-performing categories.',
-      pageWidth / 2, 130, { align: 'center' }
+      pageWidth / 2,
+      130,
+      { align: 'center' }
     );
 
     const barStartX = 40;
@@ -138,7 +141,110 @@ const generatePdf = async (domain, scores) => {
       pdf.text(`${item.score}/100`, barStartX + barWidth + 5, y + 4);
     });
 
-    // Add additional sections (to be inserted in part 2)
+    // ===== SECTION PAGES =====
+    const sections = [
+      { id: 'performance-section', title: 'Performance Analysis' },
+      { id: 'seo-section', title: 'SEO Analysis' },
+      { id: 'mobile-section', title: 'Mobile Analysis' },
+      { id: 'security-section', title: 'Security Analysis' }
+    ];
+
+    for (const section of sections) {
+      try {
+        const element = document.getElementById(section.id);
+        if (!element) {
+          console.warn(`Element not found: ${section.id}`);
+          continue;
+        }
+
+        pdf.addPage();
+        addDarkBackground();
+        pdf.setFontSize(22);
+        pdf.setTextColor(accentColor);
+        pdf.text(section.title, 20, 30);
+
+        const canvas = await html2canvas(element, {
+          scale: 1.5,
+          backgroundColor: primaryColor,
+          logging: false,
+          useCORS: true
+        });
+
+        const imgHeight = (pageWidth - 20) * (canvas.height / canvas.width);
+        pdf.addImage(canvas, 'PNG', 10, 40, pageWidth - 20, imgHeight);
+      } catch (e) {
+        console.error(`Error processing ${section.id}:`, e);
+      }
+    }
+
+    // ===== EDGECAST SOLUTIONS PAGE =====
+    pdf.addPage();
+    addDarkBackground();
+
+    pdf.setFontSize(22);
+    pdf.setTextColor(accentColor);
+    pdf.text('How Edgecast Can Help', 20, 30);
+
+    const solutions = [
+      { title: 'Performance Solutions', text: [
+        '• Global CDN with 50+ PoPs worldwide',
+        '• Advanced caching and image optimization',
+        '• Real-time performance monitoring'] },
+      { title: 'Security Solutions', text: [
+        '• Web Application Firewall (WAF)',
+        '• DDoS protection and bot mitigation',
+        '• API security and threat intelligence'] },
+      { title: 'Mobile Optimization', text: [
+        '• Adaptive media delivery',
+        '• Device-specific optimizations',
+        '• Accelerated mobile pages'] },
+      { title: 'SEO Improvements', text: [
+        '• Faster page loads for better rankings',
+        '• Improved crawlability',
+        '• Structured data support'] }
+    ];
+
+    const colWidth = 80;
+    solutions.forEach((sol, i) => {
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const x = 20 + col * colWidth;
+      const y = 50 + row * 50;
+
+      pdf.setFontSize(14);
+      pdf.setTextColor(accentColor);
+      pdf.text(sol.title, x, y);
+
+      pdf.setFontSize(10);
+      pdf.setTextColor(textColor);
+      pdf.text(sol.text, x, y + 7);
+    });
+
+    pdf.setFontSize(14);
+    pdf.setTextColor(accentColor);
+    pdf.text('Ready to implement these improvements?', pageWidth / 2, 180, { align: 'center' });
+
+    pdf.setFontSize(12);
+    pdf.setTextColor(textColor);
+    pdf.text('Our team can help optimize your website based on these findings.', pageWidth / 2, 188, { align: 'center' });
+
+    pdf.setTextColor(accentColor);
+    pdf.textWithLink('Contact Edgecast Solutions', pageWidth / 2, 200, {
+      align: 'center',
+      url: 'https://www.edgecast.com/contact'
+    });
+
+    // ===== Page Numbers =====
+    const pageCount = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(10);
+      pdf.setTextColor(secondaryText);
+      pdf.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+    }
+
+    // ===== Save PDF =====
+    pdf.save(`WebPulse_${domain.replace(/[^a-z0-9]/gi, '_')}_Report.pdf`);
 
   } catch (error) {
     console.error('PDF generation failed:', error);
