@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { analyzeDomain } = require('./controllers/analysisController');
-
+require('./db');
 
 const app = express();
 const PORT = 5050;

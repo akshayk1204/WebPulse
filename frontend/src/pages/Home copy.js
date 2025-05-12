@@ -201,18 +201,17 @@ const Home = () => {
       
       console.log('Server Response:', response);
 
-      if (!response.data?.performanceData) {
+      if (!response.data?.performance) {
         throw new Error('Invalid response structure from server');
       }
 
       navigate('/result', {
         state: {
           domain,
-          performance: response.data.performanceData || {},
-          seo: response.data.seoData || {},
-          security: response.data.securityData || {},
-          mobile: response.data.mobileData || { responsive: false },
-          guid: response.data.guid, 
+          performance: response.data.performance || {},
+          seo: response.data.seo || {},
+          security: response.data.security || {},
+          mobile: response.data.mobile || { responsive: false }
         }
       });
     } catch (err) {
