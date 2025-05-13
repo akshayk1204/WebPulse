@@ -3,16 +3,26 @@ const { getPageSpeed } = require('../services/performanceService');
 const { analyzeSEO } = require('../services/seoService');
 const { getSecurity } = require('../services/securityService');
 const { analyzeMobileMetrics } = require('../services/mobileService');
-const { insertReport } = require('../db');
+const { insertReport, getReportByGuid } = require('../db');
 
 const analyzeDomain = async (req, res) => {
   const { domain, language = 'en' } = req.body;
-  if (!domain) return res.status(400).json({ error: 'Domain is required' });
+  
+  // Validate input
+  if (!domain || typeof domain !== 'string') {
+    return res.status(400).json({ 
+      status: 'error',
+      error: 'Valid domain is required',
+      timestamp: new Date().toISOString()
+    });
+  }
 
-  const sanitizedDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
-
+  const sanitizedDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0];
+  
   try {
-    // Run all tests in parallel
+    console.log(`Starting analysis for domain: ${sanitizedDomain}`);
+    
+    // Execute all analysis in parallel
     const [performance, seo, security, mobile] = await Promise.allSettled([
       getPageSpeed(sanitizedDomain),
       analyzeSEO(sanitizedDomain),
@@ -20,85 +30,148 @@ const analyzeDomain = async (req, res) => {
       analyzeMobileMetrics(sanitizedDomain)
     ]);
 
-    const performanceData = performance.status === 'fulfilled' ? performance.value : {};
-    const seoData = seo.status === 'fulfilled' ? seo.value : {};
-    const securityData = security.status === 'fulfilled' ? security.value : {};
-    const mobileData = mobile.status === 'fulfilled' ? mobile.value : {};
+    // Process results with error fallbacks
+    const results = {
+      performance: performance.status === 'fulfilled' ? performance.value : { 
+        error: 'Performance analysis failed',
+        performanceScore: 0 
+      },
+      seo: seo.status === 'fulfilled' ? seo.value : { 
+        error: 'SEO analysis failed' 
+      },
+      security: security.status === 'fulfilled' ? security.value : { 
+        error: 'Security analysis failed' 
+      },
+      mobile: mobile.status === 'fulfilled' ? mobile.value : { 
+        error: 'Mobile analysis failed' 
+      }
+    };
 
+    // Calculate scores with fallbacks
     const scores = {
-      performance: performanceData.performanceScore || 0,
-      seo: computeSeoScore(seoData),
-      mobile: computeMobileScore(mobileData),
-      security: computeSecurityScore(securityData)
+      performance: results.performance.performanceScore || 0,
+      seo: computeSeoScore(results.seo),
+      mobile: computeMobileScore(results.mobile),
+      security: computeSecurityScore(results.security),
+      overall: 0
     };
     scores.overall = Math.round(
       (scores.performance + scores.seo + scores.mobile + scores.security) / 4
     );
 
+    // Generate and verify report persistence
     const guid = uuidv4();
-
-    await insertReport({
+    const reportPayload = {
       guid,
       domain: sanitizedDomain,
       language,
       scores,
-      performanceData,
-      seoData,
-      mobileData,
-      securityData
-    });
+      performanceData: results.performance,
+      seoData: results.seo,
+      mobileData: results.mobile,
+      securityData: results.security
+    };
+
+    console.log(`Attempting to store report for GUID: ${guid}`);
+    const insertedGuid = await insertReport(reportPayload);
+    
+    // Verify the report was actually stored
+    const dbReport = await getReportByGuid(insertedGuid);
+    if (!dbReport) {
+      throw new Error('Report verification failed - not found in database');
+    }
+    console.log(`Successfully stored report for GUID: ${insertedGuid}`);
 
     return res.json({
-      guid,
+      status: 'success',
+      guid: insertedGuid,
       domain: sanitizedDomain,
       language,
       scores,
-      performanceData,
-      seoData,
-      mobileData,
-      securityData
+      performanceData: results.performance,
+      seoData: results.seo,
+      mobileData: results.mobile,
+      securityData: results.security,
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    console.error('Analysis error:', error.message);
-    return res.status(500).json({ error: 'Analysis failed', details: error.message });
+    console.error('Analysis pipeline failed:', {
+      domain: sanitizedDomain,
+      error: error.message,
+      stack: error.stack
+    });
+    
+    return res.status(500).json({
+      status: 'error',
+      error: 'Analysis failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      timestamp: new Date().toISOString()
+    });
   }
 };
 
-// --- Scoring helpers ---
+// --- Scoring helpers with enhanced validation ---
 
 function computeSeoScore(data) {
-  if (data?.error) return 0;
+  if (!data || data?.error) return 0;
+  
   let score = 0;
-  if (data.indexable) score += 25;
-  if (data.hasMetaDescription) score += 25;
-  if (data.usesCleanContent) score += 25;
-  if (data.hasDescriptiveLinks) score += 25;
-  return score;
+  const checks = [
+    { condition: data.indexable, points: 25 },
+    { condition: data.hasMetaDescription, points: 25 },
+    { condition: data.usesCleanContent, points: 25 },
+    { condition: data.hasDescriptiveLinks, points: 25 }
+  ];
+  
+  checks.forEach(({ condition, points }) => {
+    if (condition) score += points;
+  });
+  
+  return Math.min(score, 100); // Ensure score doesn't exceed 100
 }
 
 function computeMobileScore(data) {
-  if (data?.error) return 0;
+  if (!data || data?.error) return 0;
+  
   let score = 0;
-  if (data.responsive) score += 20;
-  if (data.viewportMeta) score += 20;
-  if (data.tapTargets) score += 20;
-  if (data.mobileSpeed) score += 20;
-  if (data.fontSizes) score += 10;
-  if (data.contentFitting) score += 10;
-  return score;
+  const checks = [
+    { condition: data.responsive, points: 20 },
+    { condition: data.viewportMeta, points: 20 },
+    { condition: data.tapTargets, points: 20 },
+    { condition: data.mobileSpeed, points: 20 },
+    { condition: data.fontSizes, points: 10 },
+    { condition: data.contentFitting, points: 10 }
+  ];
+  
+  checks.forEach(({ condition, points }) => {
+    if (condition) score += points;
+  });
+  
+  return Math.min(score, 100);
 }
 
 function computeSecurityScore(data) {
-  if (data?.error) return 0;
+  if (!data || data?.error) return 0;
+  
   let score = 0;
-  if (data.sslStatus === 'Valid') score += 25;
-  if (data.https) score += 25;
-  if (data.securityHeaders === 'Enabled') score += 20;
-  if (data.firewallDetected) score += 15;
-  if (data.corsPolicy === 'Restricted') score += 10;
-  if (data.cookieSecurity?.secure && data.cookieSecurity?.httpOnly) score += 5;
-  return score;
+  const checks = [
+    { condition: data.sslStatus === 'Valid', points: 25 },
+    { condition: data.https, points: 25 },
+    { condition: data.securityHeaders === 'Enabled', points: 20 },
+    { condition: data.firewallDetected, points: 15 },
+    { condition: data.corsPolicy === 'Restricted', points: 10 },
+    { 
+      condition: data.cookieSecurity?.secure && data.cookieSecurity?.httpOnly, 
+      points: 5 
+    }
+  ];
+  
+  checks.forEach(({ condition, points }) => {
+    if (condition) score += points;
+  });
+  
+  return Math.min(score, 100);
 }
 
 module.exports = { analyzeDomain };

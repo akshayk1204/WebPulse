@@ -258,6 +258,15 @@ const Result = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
+  useEffect(() => {
+    if (!state && !isLoading) {
+      const savedState = localStorage.getItem('currentAnalysis');
+      if (savedState) {
+        navigate('.', { state: JSON.parse(savedState), replace: true });
+      }
+    }
+  }, [state, isLoading, navigate]);
+
   // Destructure backend data with proper fallbacks
   const {
     domain = '',
@@ -444,31 +453,51 @@ const Result = () => {
               mt: 4,
               mb: 2
             }}>
-              <Button 
-                variant="contained"
-                disabled={isGeneratingPdf}
-                sx={{
-                  px: 4,
-                  py: 1.5,
-                  width: '90%',
-                  fontWeight: 'bold',
-                  fontSize: '1rem',
-                  backgroundColor: '#FF6F59',
-                  color: '#FFFFFF',
-                  borderRadius: '4px',
-                  '&:hover': {
-                    backgroundColor: '#E65A46'
-                  },
-                  '&:disabled': {
-                    backgroundColor: '#FF6F59',
-                    opacity: 0.7
-                  }
-                }}
-                onClick={handleDownloadPdf}
-                startIcon={isGeneratingPdf ? <CircularProgress size={20} color="inherit" /> : <DownloadIcon />}
-              >
-                {isGeneratingPdf ? 'Generating Report...' : 'Download Full Report'}
-              </Button>
+            <Button 
+            variant="contained"
+            sx={{ 
+              px: 4,
+              py: 1.5,
+              width: '90%',
+              fontWeight: 'bold',
+              fontSize: '1rem',
+              backgroundColor: '#FF6F59',
+              color: '#FFFFFF',
+              borderRadius: '4px',
+              '&:hover': {
+                backgroundColor: '#E65A46'
+              },
+              '&:disabled': {
+                backgroundColor: '#FF6F59',
+                opacity: 0.7
+              }
+            }}
+            disabled={!guid}
+            onClick={() => {
+              if (!guid) {
+                console.error('No GUID available for sharing');
+                return;
+              }
+              
+              const reportUrl = `https://webpulse.letsdemo.co/share/${guid}`;
+              console.log('Sharing report URL:', reportUrl);
+              
+              // Open in new tab
+              const newWindow = window.open(reportUrl, '_blank', 'noopener,noreferrer');
+              
+              // Fallback if popup is blocked
+              if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                navigator.clipboard.writeText(reportUrl).then(() => {
+                  alert('Report link copied to clipboard!');
+                }).catch(() => {
+                  prompt('Copy this report link:', reportUrl);
+                });
+              }
+            }}
+          >
+            Share Report
+          </Button>
+
             </Box>
           </Box>
         </Box>

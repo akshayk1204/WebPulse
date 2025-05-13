@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebPulse Report - <%= report.domain %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+      margin: 0;
+      background-color: #E0E7F7;
+      color: #333;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      min-height: 100vh;
+    }
+    .side-panel {
+      width: 25%;
+      background-color: #00112F;
+      color: white;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .side-panel img {
+      height: 32px;
+      filter: brightness(0) invert(1);
+      margin-bottom: 2rem;
+    }
+    .gauge-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin-bottom: 2rem;
+    }
+    .gauge-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 10px solid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: white;
+    }
+    .gauge-label {
+      position: absolute;
+      bottom: -1.5rem;
+      width: 100%;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    .score-section {
+      width: 100%;
+      padding: 0 1rem;
+    }
+    .score-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1rem 0 0.5rem;
+      font-weight: 600;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background-color: rgba(255,255,255,0.3);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+    .main-content {
+      width: 75%;
+      padding: 2rem;
+    }
+    .main-header {
+      text-align: center;
+    }
+    .main-header h2 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    .main-header small {
+      color: #555;
+      font-weight: normal;
+    }
+    .main-header h3 {
+      margin-top: 0.25rem;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+    .screenshot {
+      max-width: 800px;
+      margin: 2rem auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+    }
+    .screenshot img {
+      width: 100%;
+      height: auto;
+    }
+    .section {
+      max-width: 1200px;
+      margin: 3rem auto;
+    }
+    .section h2 {
+      font-size: 1.75rem;
+      font-weight: bold;
+      color: #0038A8;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 0.5rem;
+    }
+    .section h2 i {
+      color: #0038A8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="side-panel">
+      <img src="/assets/EC-logo.png" alt="Edgecast Logo" />
+      <h3><%= report.domain %></h3>
+      <% const overallColor = report.scores.overall >= 80 ? '#4caf50' : report.scores.overall >= 41 ? '#ff9800' : '#f44336'; %>
+      <div class="gauge-container">
+        <div class="gauge-ring" style="border-color: <%= overallColor %>; background-color: <%= overallColor %>">
+          <%= report.scores.overall %>
+        </div>
+        <div class="gauge-label">Overall Score</div>
+      </div>
+
+      <div class="score-section">
+        <% const sectionIcons = {
+             performance: 'fa-gauge-high',
+             seo: 'fa-magnifying-glass-chart',
+             mobile: 'fa-mobile-screen',
+             security: 'fa-shield-halved' 
+           };
+        ['performance', 'seo', 'mobile', 'security'].forEach(section => {
+          const score = report.scores[section];
+          const barColor = score >= 80 ? '#4caf50' : score >= 41 ? '#ff9800' : '#f44336';
+        %>
+          <div class="score-label">
+            <div><i class="fas <%= sectionIcons[section] %>"></i> <%= section.charAt(0).toUpperCase() + section.slice(1) %></div>
+            <div><%= score %>/100</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: <%= score %>%; background-color: <%= barColor %>;"></div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="main-header">
+        <h2>WebPulse <small>powered by Edgecast</small></h2>
+        <h3>Website Analysis</h3>
+      </div>
+
+      <% if (report.performance_data.screenshot) { %>
+        <div class="screenshot">
+          <img src="<%= report.performance_data.screenshot %>" alt="Website Screenshot" />
+        </div>
+      <% } %>
+
+      <div class="section">
+        <h2><i class="fas fa-gauge-high"></i> Performance</h2>
+        <p class="text-muted">Speed shapes success—a faster site drives higher rankings, happier visitors, more conversions, and bigger revenue.</p>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+  <% const performanceMetrics = [
+    { key: 'performanceScore', label: 'Performance Score', icon: 'fa-bolt', value: report.performance_data.performanceScore, explanation: 'Overall speed score—how quickly and smoothly your site loads and responds.' },
+    { key: 'firstContentfulPaint', label: 'First Contentful Paint (s)', icon: 'fa-paint-brush', value: report.performance_data.firstContentfulPaint, explanation: 'FCP measures how fast content starts to appear. Faster FCP means users see something sooner.' },
+    { key: 'largestContentfulPaint', label: 'Largest Contentful Paint (s)', icon: 'fa-tachometer-alt', value: report.performance_data.largestContentfulPaint, explanation: 'LCP shows how soon main content becomes visible. Critical for perceived performance.' },
+    { key: 'timeToFirstByte', label: 'Time to First Byte (s)', icon: 'fa-database', value: report.performance_data.timeToFirstByte, explanation: 'TTFB shows server responsiveness. Faster values improve load experience.' },
+    { key: 'cumulativeLayoutShift', label: 'Cumulative Layout Shift', icon: 'fa-expand-arrows-alt', value: report.performance_data.cumulativeLayoutShift, explanation: 'CLS measures visual stability. Lower scores mean fewer layout shifts.' },
+    { key: 'interactionToNextPaint', label: 'Interaction to Next Paint (s)', icon: 'fa-mouse-pointer', value: report.performance_data.interactionToNextPaint, explanation: 'INP reflects interaction delay. Lower values mean better responsiveness.' }
+  ];
+
+  performanceMetrics.forEach(metric => {
+    const val = parseFloat(metric.value);
+    const score = metric.key === 'cumulativeLayoutShift'
+      ? (val <= 0.1 ? 100 : val <= 0.25 ? 60 : 30)
+      : (val <= 2 ? 100 : val <= 4 ? 60 : 30);
+    const color = score >= 85 ? '#4caf50' : score >= 70 ? '#8bc34a' : score >= 50 ? '#ff9800' : '#f44336';
+    const badgeLabel = score >= 85 ? 'Excellent' : score >= 70 ? 'Good' : score >= 50 ? 'Fair' : 'Poor';
+  %>
+    <div class="col">
+      <div class="metric-tile">
+        <div class="metric-badge" style="background-color: <%= color %>;"><%= badgeLabel %></div>
+        <div class="mb-2"><i class="fas <%= metric.icon %> fa-2x"></i></div>
+        <h5><%= metric.label %></h5>
+        <p class="fs-5 fw-bold"><%= metric.value %></p>
+        <p class="text-muted" style="font-size: 0.85rem;"><%= metric.explanation %></p>
+      </div>
+    </div>
+  <% }); %>
+</div>
+
+<!-- Recommendations Placeholder -->
+<div class="section">
+  <h2><i class="fas fa-lightbulb"></i> Performance Recommendations</h2>
+  <p class="text-muted">Suggestions based on your current performance metrics. Addressing these can enhance speed and user satisfaction.</p>
+  <table style="width: 100%; border-collapse: collapse; background: white;">
+    <thead>
+      <tr style="background-color: #f0f0f0;">
+        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ccc;">Metric</th>
+        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ccc;">Current</th>
+        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ccc;">Recommended</th>
+        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ccc;">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (report.performance_data.performanceScore < 75) { %>
+        <tr>
+          <td>Performance Score</td>
+          <td><%= report.performance_data.performanceScore %>/100</td>
+          <td>> 75</td>
+          <td>Optimize resources and reduce page load time.</td>
+        </tr>
+      <% } %>
+      <% if (parseFloat(report.performance_data.firstContentfulPaint) > 3.5) { %>
+        <tr>
+          <td>First Contentful Paint (s)</td>
+          <td><%= report.performance_data.firstContentfulPaint %></td>
+          <td><= 3.5s</td>
+          <td>Optimize render-blocking resources and reduce font load time.</td>
+        </tr>
+      <% } %>
+      <% if (parseFloat(report.performance_data.largestContentfulPaint) > 2.5) { %>
+        <tr>
+          <td>Largest Contentful Paint (s)</td>
+          <td><%= report.performance_data.largestContentfulPaint %></td>
+          <td><= 2.5s</td>
+          <td>Compress images and minimize layout shift.</td>
+        </tr>
+      <% } %>
+      <% if (parseFloat(report.performance_data.timeToFirstByte) > 1.5) { %>
+        <tr>
+          <td>Time to First Byte (s)</td>
+          <td><%= report.performance_data.timeToFirstByte %></td>
+          <td><= 1.5s</td>
+          <td>Improve backend performance and caching strategy.</td>
+        </tr>
+      <% } %>
+      <% if (parseFloat(report.performance_data.cumulativeLayoutShift) > 0.1) { %>
+        <tr>
+          <td>Cumulative Layout Shift</td>
+          <td><%= report.performance_data.cumulativeLayoutShift %></td>
+          <td><= 0.1</td>
+          <td>Set size attributes on images and avoid layout shifts during page load.</td>
+        </tr>
+      <% } %>
+      <% if (parseFloat(report.performance_data.interactionToNextPaint) > 1.0) { %>
+        <tr>
+          <td>Interaction to Next Paint (s)</td>
+          <td><%= report.performance_data.interactionToNextPaint %></td>
+          <td><= 1.0s</td>
+          <td>Break up long tasks and defer non-critical JS.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

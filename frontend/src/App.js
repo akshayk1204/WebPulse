@@ -3,6 +3,7 @@ import { CssBaseline } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Result from './pages/Result';
+import ReportView from './pages/ReportView'; 
 
 const theme = createTheme({
   typography: {
@@ -24,6 +25,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/result" element={<Result />} />
+          <Route path="/share/:guid" element={<ReportView />} /> {/* ✅ Add this line */}
           <Route path="*" element={<Home />} /> {/* Fallback route */}
         </Routes>
       </Router>
