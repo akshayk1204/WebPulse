@@ -21,6 +21,10 @@ import SecuritySection from '../sections/securitySection';
 import generatePdf from '../utils/generatePdf';
 import DownloadIcon from '@mui/icons-material/Download';
 import RecommendationSection from '../sections/RecommendationSection';
+import SpeedoSVG from '../assets/speedo.svg';
+import SeoSVG from '../assets/seo.svg';
+import MobileSVG from '../assets/mobile.svg';
+import SecuritySVG from '../assets/security.svg';
 
 const PerformanceSection = React.lazy(() => import('../sections/PerformanceSection'));
 const SEOSection = React.lazy(() => import('../sections/SEOSection'));
@@ -275,7 +279,6 @@ const Result = () => {
     seo = {},
     mobile = {},
     security = {},
-    screenshot = '',
     guid = ''
   } = state || {};
   
@@ -453,7 +456,7 @@ const Result = () => {
               mt: 4,
               mb: 2
             }}>
-            <Button 
+          <Button 
             variant="contained"
             sx={{ 
               px: 4,
@@ -479,7 +482,7 @@ const Result = () => {
                 return;
               }
               
-              const reportUrl = `https://webpulse.letsdemo.co/share/${guid}`;
+              const reportUrl = `${window.location.origin}/share/${guid}`;
               console.log('Sharing report URL:', reportUrl);
               
               // Open in new tab
@@ -504,69 +507,62 @@ const Result = () => {
       </SidePanel>
 
       <MainContent id="report-content">
-        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mt={4} mb={4}>
-          <Box display="flex" alignItems="baseline" justifyContent="flex-start" width="100%" maxWidth="1200px" px={2}>
-            <Typography variant="h3" sx={{ fontWeight: 'bold', mr: 1 }}>
-              {t.webPulse}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {t.poweredBy}
-            </Typography>
-          </Box>
-          <Typography variant="h4" sx={{ fontWeight: 'medium', textAlign: 'center', mt: 3 }}>
-            {t.websiteAnalysis}
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mt={4} mb={4}>
+        <Box display="flex" alignItems="baseline" justifyContent="flex-start" width="100%" maxWidth="1200px" px={2}>
+          <Typography variant="h3" sx={{ fontWeight: 'bold', mr: 1 }}>
+            {t.webPulse}
           </Typography>
-          
-          {screenshot && (
-            <Box sx={{ 
-              mt: 4, 
-              mb: 6,
-              width: '100%',
-              maxWidth: '800px',
-              border: '1px solid #ddd',
-              borderRadius: 2,
-              overflow: 'hidden',
-              boxShadow: 3,
-              mx: 'auto'
-            }}>
-              <Typography variant="subtitle1" sx={{ 
-                backgroundColor: '#f5f5f5', 
-                p: 1, 
-                textAlign: 'center',
-                borderBottom: '1px solid #ddd'
-              }}>
-                {domain} Screenshot
-              </Typography>
-              <Box
-                component="img"
-                src={screenshot}
-                alt={`${domain} screenshot`}
-                sx={{
-                  width: '100%',
-                  height: 'auto',
-                  display: 'block'
-                }}
-              />
-            </Box>
-          )}
+          <Typography variant="body2" color="text.secondary">
+            {t.poweredBy}
+          </Typography>
         </Box>
+        <Typography variant="h4" sx={{ fontWeight: 'medium', textAlign: 'center', mt: 3 }}>
+          {t.websiteAnalysis}
+        </Typography>
 
-        <Suspense fallback={<CircularProgress />}>
-          <div id="performance-section">
-            <PerformanceSection 
-              data={{
-                ...performanceData,
-                score: performanceScore
-              }} 
-              language={language} 
+        {performanceData?.screenshot && (
+          <Box sx={{ 
+            mt: 4, 
+            mb: 6,
+            width: '100%',
+            maxWidth: '800px',
+            border: '1px solid #ddd',
+            borderRadius: 2,
+            overflow: 'hidden',
+            boxShadow: 3,
+            mx: 'auto'
+          }}>
+            <Box
+              component="img"
+              src={performanceData.screenshot}
+              alt={`${domain} screenshot`}
+              sx={{
+                width: '100%',
+                height: 'auto',
+                display: 'block'
+              }}
             />
-          </div>
+          </Box>
+        )}
+      </Box>
+        <Suspense fallback={<CircularProgress />}>
+        <SectionHeader>
+          <img src={SpeedoSVG} alt="Speedometer Icon" style={{ width: 80 }} />
+        </SectionHeader>
+
+        <PerformanceSection 
+          data={{ ...performanceData, score: performanceScore }} 
+          language={language} 
+        />
           <RecommendationSection 
             category="performance" 
             performanceData={performanceData} 
             language={language} 
           />
 
+          <SectionHeader>
+            <img src={SeoSVG} alt="SEO Icon" style={{ width: 80 }} />
+          </SectionHeader>
           <SEOSection 
             seoData={{
               ...seoData,
@@ -582,6 +578,7 @@ const Result = () => {
           />
 
           <SectionHeader>
+            <img src={MobileSVG} alt="Mobile Icon" style={{ width: 80 }} />
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
               {t.mobileTitle}
             </Typography>
@@ -602,6 +599,7 @@ const Result = () => {
           />
 
           <SectionHeader>
+            <img src={SecuritySVG} alt="Security Icon" style={{ width: 80 }} />
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
               {t.security}
             </Typography>

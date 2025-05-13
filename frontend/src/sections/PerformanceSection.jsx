@@ -299,12 +299,6 @@ const PerformanceSection = ({ data, language = 'en' }) => {
         tagline={t.tagline}
       />
 
-      {data.source && data.source !== 'Google PageSpeed' && (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          {t.testResults} {data.source}
-        </Alert>
-      )}
-
       <Box
         sx={{
           display: 'grid',

@@ -9,7 +9,7 @@ const compression = require('compression');
 const { analyzeDomain } = require('./controllers/analysisController');
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 require('./db');
 const { getReportByGuid } = require('./db');
 
@@ -18,20 +18,51 @@ const PORT = process.env.PORT || 5050;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // ======================
-// Middleware Configuration
+// Security Middleware
 // ======================
 app.use(helmet({
-  contentSecurityPolicy: isProduction ? undefined : false
+  contentSecurityPolicy: isProduction ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
+      fontSrc: ["'self'"],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"]
+    }
+  } : false
 }));
 
 app.use(compression());
+
+// ======================
+// Request Parsing
+// ======================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ======================
 // Static Assets
 // ======================
-app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
+app.use('/assets', express.static(path.join(__dirname, 'public/assets'), {
+  maxAge: '1y',
+  immutable: true
+})); // <-- This was missing closing parenthesis
+
+// Serve React build files in production
+if (isProduction) {
+  app.use(express.static(path.join(__dirname, '../frontend/build'), {
+    maxAge: '1y',
+    immutable: true,
+    setHeaders: (res, path) => {
+      if (path.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    }
+  })); // <-- This was missing closing parenthesis
+}
 
 // ======================
 // CORS Configuration
@@ -44,7 +75,6 @@ app.use(cors({
   origin: allowedOrigins,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200,
   credentials: true
 }));
 
@@ -54,9 +84,7 @@ app.use(cors({
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isProduction ? 100 : 1000,
-  message: 'Too many requests, please try again later',
-  standardHeaders: true,
-  legacyHeaders: false
+  message: 'Too many requests, please try again later'
 });
 
 // ======================
@@ -78,7 +106,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Strict GUID validation middleware
+// GUID validation middleware
 const validateGuid = (req, res, next) => {
   const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (!guidRegex.test(req.params.guid)) {
@@ -87,7 +115,12 @@ const validateGuid = (req, res, next) => {
   next();
 };
 
-// Report API with separate validation
+// Backwards compatibility redirect
+app.get('/report/:guid', validateGuid, (req, res) => {
+  res.redirect(301, `/share/${req.params.guid}`);
+});
+
+// Report API endpoint
 app.get('/api/report/:guid', validateGuid, async (req, res) => {
   try {
     const report = await getReportByGuid(req.params.guid);
@@ -105,7 +138,7 @@ app.get('/api/report/:guid', validateGuid, async (req, res) => {
   }
 });
 
-// Analysis Endpoint
+// Analysis endpoint
 app.post('/analyze', apiLimiter, async (req, res) => {
   try {
     await analyzeDomain(req, res);
@@ -119,19 +152,28 @@ app.post('/analyze', apiLimiter, async (req, res) => {
 });
 
 // ======================
-// Client-Side Routing (Production Only)
+// Share Report Handling
+// ======================
+
+// Share route handler
+app.get('/share/:guid', validateGuid, (req, res) => {
+  if (isProduction) {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  } else {
+    res.redirect(`http://localhost:3000/share/${req.params.guid}`);
+  }
+});
+
+// ======================
+// Client-Side Routing
 // ======================
 if (isProduction) {
-  // Serve React build files
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
-  
-  // Handle client-side routing - must be last
   app.get('*', (req, res) => {
-    // Skip API routes and static files
-    if (req.path.startsWith('/api') || req.path.includes('.')) {
-      return res.status(404).end();
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+    } else {
+      res.status(404).end();
     }
-    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
   });
 }
 
@@ -153,9 +195,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
 
-// ======================
-// Process Management
-// ======================
+// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully');
   server.close(() => {
