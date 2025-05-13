@@ -138,13 +138,15 @@ app.get('/api/report/:guid', validateGuid, async (req, res) => {
 });
 
 // Analysis endpoint
-app.post('/analyze', apiLimiter, async (req, res) => {
+app.post('/api/analyze', apiLimiter, async (req, res) => {
   try {
+    console.log('Analysis request received for domain:', req.body.domain); // Add logging
     await analyzeDomain(req, res);
   } catch (error) {
     console.error('Analysis error:', error);
     res.status(500).json({
       error: 'Analysis failed',
+      details: error.message, // Include error details
       timestamp: new Date().toISOString()
     });
   }

@@ -177,16 +177,16 @@ const Home = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!domain) return;
-
+  
     const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
     if (!domainRegex.test(domain)) {
       setError('Please enter a valid domain (e.g. example.com)');
       return;
     }
-
+  
     setLoading(true);
     setError(null);
-
+  
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/analyze`, 
@@ -194,39 +194,42 @@ const Home = () => {
         { 
           timeout: 45000,
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          withCredentials: true
         }
       );
       
-      console.log('Server Response:', response);
-
-      if (!response.data?.performanceData) {
-        throw new Error('Invalid response structure from server');
+      if (!response.data?.guid) {
+        throw new Error('Invalid response from server');
       }
-
+  
       navigate('/result', {
         state: {
           domain,
-          performance: response.data.performanceData || {},
-          seo: response.data.seoData || {},
-          security: response.data.securityData || {},
-          mobile: response.data.mobileData || { responsive: false },
-          guid: response.data.guid, 
+          guid: response.data.guid,
+          // Add other data as needed
         }
       });
     } catch (err) {
       console.error('Analysis error:', err);
       let errorMessage = 'Analysis failed. Please try again.';
       
-      if (err.code === 'ECONNABORTED') {
-        errorMessage = 'The request took too long. Please try again later.';
-      } else if (err.response?.data?.error) {
-        errorMessage = err.response.data.error;
-      } else if (err.message) {
-        errorMessage = err.message;
+      if (err.response) {
+        // Handle HTTP error responses
+        if (err.response.data?.error) {
+          errorMessage = err.response.data.error;
+        } else if (err.response.status === 404) {
+          errorMessage = 'API endpoint not found';
+        } else if (err.response.status === 429) {
+          errorMessage = 'Too many requests. Please wait and try again.';
+        }
+      } else if (err.request) {
+        // The request was made but no response was received
+        errorMessage = 'No response from server. Please check your connection.';
       }
-
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
