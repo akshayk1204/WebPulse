@@ -7,10 +7,7 @@ import RecommendationSection from '../sections/RecommendationSection';
 import SEOSection from '../sections/SEOSection';
 import MobileSection from '../sections/MobileSection';
 import SecuritySection from '../sections/securitySection';
-import SpeedIcon from '@mui/icons-material/Speed';
-import SearchIcon from '@mui/icons-material/Search';
-import DevicesIcon from '@mui/icons-material/Devices';
-import ShieldIcon from '@mui/icons-material/Shield';
+
 
 const translations = {
     en: {
@@ -38,8 +35,18 @@ const ReportView = () => {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await fetch(`/api/report/${guid}`);
-        if (!res.ok) throw new Error('Failed to fetch report');
+        const res = await fetch(`/api/report/${guid}`, {
+          headers: {
+            'Accept': 'application/json' // Explicitly request JSON
+          }
+        });
+        
+        // Check content type before parsing
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Invalid response format');
+        }
+        
         const data = await res.json();
         setReport(data);
       } catch (err) {
@@ -48,7 +55,7 @@ const ReportView = () => {
         setLoading(false);
       }
     };
-
+  
     fetchReport();
   }, [guid]);
 

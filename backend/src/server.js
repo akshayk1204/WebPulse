@@ -17,6 +17,9 @@ const app = express();
 const PORT = process.env.PORT || 5050;
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Trust proxy for rate limiting behind Nginx
+app.set('trust proxy', 1);
+
 // ======================
 // Security Middleware
 // ======================
@@ -49,7 +52,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/assets', express.static(path.join(__dirname, 'public/assets'), {
   maxAge: '1y',
   immutable: true
-})); // <-- This was missing closing parenthesis
+}));
 
 // Serve React build files in production
 if (isProduction) {
@@ -61,7 +64,7 @@ if (isProduction) {
         res.setHeader('Cache-Control', 'no-cache');
       }
     }
-  })); // <-- This was missing closing parenthesis
+  }));
 }
 
 // ======================
@@ -115,11 +118,6 @@ const validateGuid = (req, res, next) => {
   next();
 };
 
-// Backwards compatibility redirect
-app.get('/report/:guid', validateGuid, (req, res) => {
-  res.redirect(301, `/share/${req.params.guid}`);
-});
-
 // Report API endpoint
 app.get('/api/report/:guid', validateGuid, async (req, res) => {
   try {
@@ -131,6 +129,7 @@ app.get('/api/report/:guid', validateGuid, async (req, res) => {
         suggestion: 'This report may have expired or was deleted'
       });
     }
+    res.setHeader('Content-Type', 'application/json');
     res.json(report);
   } catch (err) {
     console.error('Failed to fetch report:', err);
@@ -152,8 +151,13 @@ app.post('/analyze', apiLimiter, async (req, res) => {
 });
 
 // ======================
-// Share Report Handling
+// Client-Side Routing
 // ======================
+
+// Backwards compatibility redirect
+app.get('/report/:guid', validateGuid, (req, res) => {
+  res.redirect(301, `/share/${req.params.guid}`);
+});
 
 // Share route handler
 app.get('/share/:guid', validateGuid, (req, res) => {
@@ -164,12 +168,10 @@ app.get('/share/:guid', validateGuid, (req, res) => {
   }
 });
 
-// ======================
-// Client-Side Routing
-// ======================
+// Catch-all route for client-side routing
 if (isProduction) {
   app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
+    if (!req.path.startsWith('/api') && !req.path.includes('.')) {
       res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
     } else {
       res.status(404).end();
