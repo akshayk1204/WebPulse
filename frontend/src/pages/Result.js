@@ -41,7 +41,12 @@ const translations = {
     security: "Security",
     webPulse: "WebPulse",
     poweredBy: "powered by Edgecast",
-    websiteAnalysis: "Website Analysis",
+    performanceAssessment: (score) => {
+      if (score >= 80) return "This site is Good";
+      if (score >= 50) return "This site is OK";
+      return "This site needs work";
+    },
+    performanceMotivation: "Now let’s take your site from good to great. See your scorecard below and take action today!",    
     howEdgecastCanHelp: "How Edgecast Can Help",
     optimizeWith: (domain) => `Optimize ${domain} with Edgecast's Performance and Security Solutions`,
     edgecastProvides: "Edgecast provides industry-leading solutions to address the challenges identified in your website analysis.",
@@ -73,7 +78,12 @@ const translations = {
     security: "Seguridad",
     webPulse: "WebPulse",
     poweredBy: "con tecnología de Edgecast",
-    websiteAnalysis: "Análisis de Sitio Web",
+    performanceAssessment: (score) => {
+      if (score >= 80) return "Este sitio es bueno";
+      if (score >= 50) return "Este sitio está bien";
+      return "Este sitio necesita mejoras";
+    },
+    performanceMotivation: "Llevemos su sitio de bueno a excelente. Vea su informe a continuación y actúe hoy.",    
     howEdgecastCanHelp: "Cómo Edgecast Puede Ayudar",
     optimizeWith: (domain) => `Optimice ${domain} con las soluciones de rendimiento y seguridad de Edgecast`,
     edgecastProvides: "Edgecast proporciona soluciones líderes en la industria para abordar los desafíos identificados en su análisis de sitio web.",
@@ -516,8 +526,12 @@ const Result = () => {
             {t.poweredBy}
           </Typography>
         </Box>
-        <Typography variant="h4" sx={{ fontWeight: 'medium', textAlign: 'center', mt: 3 }}>
-          {t.websiteAnalysis}
+        <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center', mt: 3 }}>
+          {t.performanceAssessment(performanceScore)}
+        </Typography>
+
+        <Typography variant="body1" sx={{ color: 'text.secondary', textAlign: 'center', mt: 1, maxWidth: 700 }}>
+          {t.performanceMotivation}
         </Typography>
 
         {performanceData?.screenshot && (
