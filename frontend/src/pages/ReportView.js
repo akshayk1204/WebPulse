@@ -268,7 +268,9 @@ const EdgecastHelpSection = ({ domain, language }) => {
 };
 
 const ReportView = () => {
-  const { guid } = useParams();
+    
+  const { encodedId } = useParams();
+  const guid = atob(encodedId);
   const navigate = useNavigate();
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -339,15 +341,21 @@ const ReportView = () => {
     security_data = {}
   } = report;
 
+  console.log('=== ReportView.js: Raw Data ===');
+  console.log('Scores:', scores);
+  console.log('Performance:', performance_data);
+  console.log('SEO:', seo_data);
+  console.log('Mobile:', mobile_data);
+  console.log('Security:', security_data);
+
   const t = translations[language] || translations.en;
 
-  // Calculate scores with proper fallbacks
-  const performanceScore = scores.performance ?? performance_data?.performanceScore ?? 0;
-  const seoScore = scores.seo ?? calculateSeoScore(seo_data);
-  const mobileScore = scores.mobile ?? calculateMobileScore(mobile_data);
-  const securityScore = scores.security ?? calculateSecurityScore(security_data);
-  const overallScore = scores.overall ?? 
-    Math.round((performanceScore + seoScore + mobileScore + securityScore) / 4);
+  const performanceScore = performance_data?.performanceScore ?? 0;
+  const seoScore = calculateSeoScore(seo_data);
+  const mobileScore = calculateMobileScore(mobile_data);
+  const securityScore = calculateSecurityScore(security_data);
+  const overallScore = Math.round((performanceScore + seoScore + mobileScore + securityScore) / 4);
+  
 
   return (
     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
@@ -446,7 +454,7 @@ const ReportView = () => {
 
       <MainContent id="report-content">
         {/* 1. Changed back to left alignment for WebPulse and powered by */}
-        <Box display="flex" flexDirection="column" alignItems="flex-start" justifyContent="center" mt={4} mb={4}>
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mt={4} mb={4}>
           <Box display="flex" alignItems="baseline" justifyContent="flex-start" width="100%" maxWidth="1200px" px={2}>
             <Typography variant="h3" sx={{ fontWeight: 'bold', mr: 1 }}>
               {t.webPulse}

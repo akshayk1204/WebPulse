@@ -292,6 +292,13 @@ const Result = () => {
     guid = ''
   } = state || {};
   
+  console.log('=== Result.js: Raw Data ===');
+  console.log('Scores:', scores);
+  console.log('Performance:', performance);
+  console.log('SEO:', seo);
+  console.log('Mobile:', mobile);
+  console.log('Security:', security);
+
   const performanceData = performance;
   const seoData = seo;
   const mobileData = mobile;
@@ -492,7 +499,8 @@ const Result = () => {
                 return;
               }
               
-              const reportUrl = `${window.location.origin}/share/${guid}`;
+              const encodedGuid = btoa(guid);
+              const reportUrl = `${window.location.origin}/share/${encodedGuid}`;
               console.log('Sharing report URL:', reportUrl);
               
               // Open in new tab
@@ -527,12 +535,12 @@ const Result = () => {
           </Typography>
         </Box>
         <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center', mt: 3 }}>
-          {t.performanceAssessment(performanceScore)}
-        </Typography>
+        {t.performanceAssessment(performanceScore)}
+      </Typography>
 
-        <Typography variant="body1" sx={{ color: 'text.secondary', textAlign: 'center', mt: 1, maxWidth: 700 }}>
-          {t.performanceMotivation}
-        </Typography>
+      <Typography variant="body1" sx={{ color: 'text.secondary', textAlign: 'center', mt: 1, maxWidth: 700 }}>
+        {t.performanceMotivation}
+      </Typography>
 
         {performanceData?.screenshot && (
           <Box sx={{ 

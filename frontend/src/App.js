@@ -25,7 +25,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/result" element={<Result />} />
-          <Route path="/share/:guid" element={<ReportView />} /> {/* ✅ Add this line */}
+          <Route path="/share/:encodedId" element={<ReportView />} /> 
           <Route path="*" element={<Home />} /> {/* Fallback route */}
         </Routes>
       </Router>
