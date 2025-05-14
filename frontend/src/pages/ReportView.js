@@ -11,7 +11,6 @@ import {
   Search as SearchIcon,
   Devices as DevicesIcon,
   Shield as ShieldIcon,
-  Download as DownloadIcon,
   Translate as TranslateIcon,
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
@@ -21,7 +20,6 @@ import SeoSVG from '../assets/seo.svg';
 import MobileSVG from '../assets/mobile.svg';
 import SecuritySVG from '../assets/security.svg';
 import { calculateSeoScore, calculateMobileScore, calculateSecurityScore, getScoreColor } from '../utils/scoreUtils';
-import generatePdf from '../utils/generatePdf';
 import Gauge from '../components/Gauge';
 import PerformanceSection from '../sections/PerformanceSection';
 import SEOSection from '../sections/SEOSection';
@@ -59,6 +57,10 @@ const translations = {
     noDataFound: "No analysis data found. Please analyze a website first.",
     backToHome: "Back to Home",
     seoTagline: "Boost discoverability—optimize how your site is found and displayed in search results.",
+    cdnDescription: "Content Delivery Network (CDN): Accelerate content delivery globally",
+    edgeComputeDescription: "Edge Compute: Run logic at the edge for faster response times",
+    wafDescription: "Web Application Firewall (WAF): Protect against threats",
+    ddosDescription: "DDoS Protection: Mitigate volumetric attacks",
     recommendations: {
       performance: "Performance Recommendations",
       seo: "SEO Recommendations",
@@ -95,6 +97,10 @@ const translations = {
     noDataFound: "No se encontraron datos de análisis. Por favor, analice un sitio web primero.",
     backToHome: "Volver al Inicio",
     seoTagline: "Impulsa la descubribilidad—optimiza cómo se encuentra y muestra tu sitio en los resultados de búsqueda.",
+    cdnDescription: "Red de Entrega de Contenido (CDN): Acelera la entrega de contenido globalmente",
+    edgeComputeDescription: "Edge Compute: Ejecuta lógica en el edge para tiempos de respuesta más rápidos",
+    wafDescription: "Firewall de Aplicaciones Web (WAF): Protege contra amenazas",
+    ddosDescription: "Protección DDoS: Mitiga ataques volumétricos",
     recommendations: {
       performance: "Recomendaciones de Rendimiento",
       seo: "Recomendaciones SEO",
@@ -198,7 +204,7 @@ const EdgecastHelpSection = ({ domain, language }) => {
                     <CheckCircleIcon color="primary" fontSize="small" />
                   </ListItemIcon>
                   <Typography variant="body2">
-                    Content Delivery Network (CDN): Accelerate content delivery globally
+                    {t.cdnDescription}
                   </Typography>
                 </ListItem>
                 <ListItem>
@@ -206,7 +212,7 @@ const EdgecastHelpSection = ({ domain, language }) => {
                     <CheckCircleIcon color="primary" fontSize="small" />
                   </ListItemIcon>
                   <Typography variant="body2">
-                    Edge Compute: Run logic at the edge for faster response times
+                    {t.edgeComputeDescription}
                   </Typography>
                 </ListItem>
               </List>
@@ -229,7 +235,7 @@ const EdgecastHelpSection = ({ domain, language }) => {
                     <CheckCircleIcon color="primary" fontSize="small" />
                   </ListItemIcon>
                   <Typography variant="body2">
-                    Web Application Firewall (WAF): Protect against threats
+                    {t.wafDescription}
                   </Typography>
                 </ListItem>
                 <ListItem>
@@ -237,7 +243,7 @@ const EdgecastHelpSection = ({ domain, language }) => {
                     <CheckCircleIcon color="primary" fontSize="small" />
                   </ListItemIcon>
                   <Typography variant="body2">
-                    DDoS Protection: Mitigate volumetric attacks
+                    {t.ddosDescription}
                   </Typography>
                 </ListItem>
               </List>
@@ -267,7 +273,6 @@ const ReportView = () => {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [language, setLanguage] = useState('en');
 
   useEffect(() => {
@@ -301,36 +306,6 @@ const ReportView = () => {
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'es' : 'en');
-  };
-
-  const handleDownloadPdf = async () => {
-    if (!report) return;
-    
-    setIsGeneratingPdf(true);
-    try {
-      await generatePdf(
-        report.domain,
-        {
-          overall: report.scores.overall,
-          performance: report.scores.performance,
-          seo: report.scores.seo,
-          mobile: report.scores.mobile,
-          security: report.scores.security
-        },
-        {
-          performance: report.performance_data,
-          seo: report.seo_data,
-          mobile: report.mobile_data,
-          security: report.security_data
-        },
-        language
-      );
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      setError('Failed to generate PDF. Please try again.');
-    } finally {
-      setIsGeneratingPdf(false);
-    }
   };
 
   if (loading) {
@@ -465,31 +440,12 @@ const ReportView = () => {
                 />
               </Box>
             ))}
-            
-            <Box sx={{ mt: 4 }}>
-              <Button
-                variant="contained"
-                startIcon={<DownloadIcon />}
-                onClick={handleDownloadPdf}
-                disabled={isGeneratingPdf}
-                fullWidth
-                sx={{
-                  py: 1.5,
-                  fontWeight: 'bold',
-                  backgroundColor: '#FF6F59',
-                  '&:hover': {
-                    backgroundColor: '#E65A46'
-                  }
-                }}
-              >
-                {isGeneratingPdf ? 'Generating...' : 'Download PDF'}
-              </Button>
-            </Box>
           </Box>
         </Box>
       </SidePanel>
 
       <MainContent id="report-content">
+        {/* 1. Changed back to left alignment for WebPulse and powered by */}
         <Box display="flex" flexDirection="column" alignItems="flex-start" justifyContent="center" mt={4} mb={4}>
           <Box display="flex" alignItems="baseline" justifyContent="flex-start" width="100%" maxWidth="1200px" px={2}>
             <Typography variant="h3" sx={{ fontWeight: 'bold', mr: 1 }}>
@@ -499,11 +455,10 @@ const ReportView = () => {
               {t.poweredBy}
             </Typography>
           </Box>
-          <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'left', mt: 3 }}>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center', mt: 3 }}>
             {t.performanceAssessment(performanceScore)}
           </Typography>
-
-          <Typography variant="body1" sx={{ color: 'text.secondary', textAlign: 'left', mt: 1, maxWidth: 700 }}>
+          <Typography variant="body1" sx={{ color: 'text.secondary', textAlign: 'center', mt: 1, maxWidth: 700 }}>
             {t.performanceMotivation}
           </Typography>
 
@@ -516,7 +471,8 @@ const ReportView = () => {
               border: '1px solid #ddd',
               borderRadius: 2,
               overflow: 'hidden',
-              boxShadow: 3
+              boxShadow: 3,
+              mx: 'auto'
             }}>
               <Box
                 component="img"
@@ -545,11 +501,15 @@ const ReportView = () => {
           language={language} 
         />
 
+        {/* 2. Updated SEO Section to match Result.js data structure */}
         <SectionHeader>
           <img src={SeoSVG} alt="SEO Icon" style={{ width: 80 }} />
         </SectionHeader>
         <SEOSection 
-          data={{ ...seo_data, score: seoScore }} 
+          seoData={{
+            ...seo_data,
+            score: seoScore
+          }} 
           language={language} 
           domain={domain} 
         />
@@ -559,22 +519,29 @@ const ReportView = () => {
           language={language} 
         />
 
+        {/* 2. Updated Mobile Section to match Result.js data structure */}
         <SectionHeader>
           <img src={MobileSVG} alt="Mobile Icon" style={{ width: 80 }} />
           <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
             {t.mobile}
           </Typography>
         </SectionHeader>
-        <MobileSection 
-          data={{ ...mobile_data, score: mobileScore }} 
-          language={language} 
-        />
+        <div id="mobile-section">
+          <MobileSection 
+            mobile={{
+              ...mobile_data,
+              score: mobileScore
+            }} 
+            language={language} 
+          />
+        </div>
         <RecommendationSection 
           category="mobile" 
           mobileData={mobile_data} 
           language={language} 
         />
 
+        {/* 2. Updated Security Section to match Result.js data structure */}
         <SectionHeader>
           <img src={SecuritySVG} alt="Security Icon" style={{ width: 80 }} />
           <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
@@ -584,10 +551,15 @@ const ReportView = () => {
             {t.securityDescription}
           </Typography>
         </SectionHeader>
-        <SecuritySection 
-          data={{ ...security_data, score: securityScore }} 
-          language={language} 
-        />
+        <div id="security-section">
+          <SecuritySection 
+            security={{
+              ...security_data,
+              score: securityScore
+            }} 
+            language={language} 
+          />
+        </div>
         <RecommendationSection 
           category="security" 
           securityData={security_data} 
