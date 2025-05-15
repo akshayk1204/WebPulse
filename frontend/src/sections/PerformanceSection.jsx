@@ -150,36 +150,36 @@ const translations = {
 };
 
 const normalizeScore = (label, value) => {
-  if (value === undefined || value === null || isNaN(value)) return 50;
-
-  switch (label) {
-    case 'Performance Score':
-    case 'Puntuación de Rendimiento':
-      return Math.min(100, Math.max(0, value));
+    if (value === undefined || value === null || isNaN(value)) return 50;
   
-    case 'First Contentful Paint (s)':
-    case 'Primera Pintura con Contenido (s)':
-    case 'Largest Contentful Paint (s)':
-    case 'Tiempo hasta Pintura con Contenido Principal (s)':
-    case 'Time to First Byte (s)':
-    case 'Tiempo hasta el Primer Byte (s)':
-    case 'Interaction to Next Paint (s)':
-    case 'Interacción hasta la Próxima Pintura (s)':
-      if (value <= 2) return 100;
-      if (value <= 4) return 60;
-      return 30;
+    switch (label) {
+      case 'Performance Score':
+      case 'Puntuación de Rendimiento':
+        return Math.min(100, Math.max(0, value));
   
-    case 'Cumulative Layout Shift':
-    case 'Cambio de Diseño Acumulado':
-      if (value <= 0.1) return 100;
-      if (value <= 0.25) return 60;
-      return 30;
+      case 'First Contentful Paint (s)':
+      case 'Primera Pintura con Contenido (s)':
+      case 'Largest Contentful Paint (s)':
+      case 'Pintura con Contenido Principal (s)':
+      case 'Time to First Byte (s)':
+      case 'Tiempo hasta el Primer Byte (s)':
+      case 'Interaction to Next Paint (s)':
+      case 'Interacción hasta la Próxima Pintura (s)':
+        if (value <= 2) return 100;
+        if (value <= 4) return 60;
+        return 30;
   
-    default:
-      return 50;
-  }
+      case 'Cumulative Layout Shift':
+      case 'Cambio de Diseño Acumulado':
+        if (value <= 0.1) return 100;
+        if (value <= 0.25) return 60;
+        return 30;
   
-};
+      default:
+        return 50;
+    }
+  };
+  
 
 const getGaugeColor = (score) => {
   if (score >= 80) return '#4caf50';
