@@ -25,13 +25,55 @@ const RecommendationSection = ({
 
   const trackedMetrics = {
     performance: [
-      { dataKey: 'performanceScore', translationKey: 'performanceScore', condition: value => value < 75 },
-      { dataKey: 'firstContentfulPaint', translationKey: 'firstContentfulPaint', condition: value => value > 3.5 },
-      { dataKey: 'largestContentfulPaint', translationKey: 'largestContentfulPaint', condition: value => value > 2.5 },
-      { dataKey: 'timeToFirstByte', translationKey: 'timeToFirstByte', condition: value => value > 1.5 },
-      { dataKey: 'cumulativeLayoutShift', translationKey: 'cumulativeLayoutShift', condition: value => value > 0.1 },
-      { dataKey: 'interactionToNextPaint', translationKey: 'interactionToNextPaint', condition: value => value > 1.0 }
-    ],
+        { 
+          dataKey: 'performanceScore', 
+          translationKey: 'performanceScore', 
+          condition: value => parseFloat(value) < 75,
+          formatValue: value => `${value}/100`
+        },
+        { 
+          dataKey: 'firstContentfulPaint', 
+          translationKey: 'firstContentfulPaint', 
+          condition: value => {
+            if (value === "N/A") return false;
+            return parseFloat(value) > 2.5;
+          },
+          formatValue: value => value // Keep original formatted string
+        },
+        { 
+          dataKey: 'largestContentfulPaint', 
+          translationKey: 'largestContentfulPaint', 
+          condition: value => {
+            if (value === "N/A") return false;
+            return parseFloat(value) > 2.5;
+          },
+          formatValue: value => value
+        },
+        { 
+          dataKey: 'timeToFirstByte', 
+          translationKey: 'timeToFirstByte', 
+          condition: value => {
+            if (value === "N/A") return false;
+            return parseFloat(value) > 1.5;
+          },
+          formatValue: value => value
+        },
+        { 
+          dataKey: 'cumulativeLayoutShift', 
+          translationKey: 'cumulativeLayoutShift', 
+          condition: value => parseFloat(value) > 0.1,
+          formatValue: value => value
+        },
+        { 
+          dataKey: 'interactionToNextPaint', 
+          translationKey: 'interactionToNextPaint', 
+          condition: value => {
+            if (value === "N/A") return false;
+            return parseFloat(value) > 1.0;
+          },
+          formatValue: value => value || "Not measured"
+        }
+      ],
     seo: [
       { dataKey: 'indexable', translationKey: 'permissionToIndex' },
       { dataKey: 'hasMetaDescription', translationKey: 'hasMetaDescription' },
