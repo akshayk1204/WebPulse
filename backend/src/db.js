@@ -1,23 +1,17 @@
 const { Pool } = require('pg');
 const { v4: uuidv4 } = require('uuid');
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') }); // Ensures .env in parent dir is loaded
 
-// Direct configuration (temporary solution)
 const dbConfig = {
-  user: 'webpulse_pguser',
-  host: 'localhost',
-  database: 'webpulse_db',
-  password: 'webPulse1204', // Replace with your actual password
-  port: 5432,
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: parseInt(process.env.PG_PORT, 10) || 5432,
   connectionTimeoutMillis: 5000,
   idleTimeoutMillis: 30000,
-  // Security-enhanced settings
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false
 };
-
-// Security warning - remove this in production after fixing .env
-if (process.env.NODE_ENV === 'production') {
-  console.warn('WARNING: Using hardcoded database credentials. This should be temporary!');
-}
 
 const pool = new Pool(dbConfig);
 
@@ -28,7 +22,6 @@ pool.on('connect', () => {
 
 pool.on('error', (err) => {
   console.error('Database connection error:', err.message);
-  // Optionally implement reconnection logic here
 });
 
 // Test connection on startup
@@ -39,7 +32,7 @@ pool.on('error', (err) => {
     client.release();
   } catch (err) {
     console.error('Database connection test failed:', err.message);
-    process.exit(1); // Exit if DB connection fails
+    process.exit(1);
   }
 })();
 
