@@ -70,7 +70,7 @@ const fetchPageSpeed = async (url) => {
       strategy: 'desktop',
       category: ['performance']
     },
-    timeout: 180000
+    timeout: 360000
   });
 
   return response.data;

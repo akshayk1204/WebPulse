@@ -192,7 +192,7 @@ const Home = () => {
         `${process.env.REACT_APP_API_URL}/api/analyze`, 
         { domain },
         { 
-          timeout: 45000,
+          timeout: 145000,
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
