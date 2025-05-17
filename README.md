@@ -31,5 +31,5 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/webpulse.git
+git clone https://github.com/akshayk1204/webpulse.git
 cd webpulse
